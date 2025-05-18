@@ -1,0 +1,19 @@
+{
+    "manifest_version": 3,
+    "name": "Cover Letter",
+    "version": "1.0",
+    "description": "A brief description of your extension",
+    "action": {
+      "default_popup": "popup.html",
+      "default_icon": "icons/icon16.ico"
+    },
+    "permissions": [
+    "activeTab",
+    "scripting",
+    "contextMenus",
+    "storage"
+  ],
+    "background": {
+        "service_worker": "background.js"
+    }
+  }
