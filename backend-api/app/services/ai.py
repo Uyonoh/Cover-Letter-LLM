@@ -49,7 +49,7 @@ def initialize_model() -> genai.GenerativeModel:
     for attempt in range(max_retries):
         try:
             return genai.GenerativeModel(
-                model_name="gemini-pro",
+                model_name="gemini-2.0-flash",
                 generation_config=GENERATION_CONFIG,
                 safety_settings=SAFETY_SETTINGS
             )
@@ -83,20 +83,24 @@ async def generate_cover_letter(resume_text: str, job_description: str) -> Tuple
         return None, "Resume text and job description cannot be empty"
     
     prompt = f"""
-    **Task:** Write a professional cover letter
-    
-    **Resume Details:**
-    {resume_text}
-    
-    **Job Description:**
+    You are a professional career assistant. Write a personalized, engaging, and concise cover letter tailored to the job description and resume below.
+
+    Job Description:
     {job_description}
-    
-    **Requirements:**
-    - 3-4 paragraphs
-    - Professional tone
-    - Highlight matching skills
-    - Address key job requirements
-    - No generic phrases
+
+    Candidate Resume:
+    {resume_text}
+
+    Cover letter requirements:
+    - 3 short paragraphs (intro, match, enthusiasm)
+    - Use professional, warm tone
+    - Avoid generic phrases (e.g., "I'm a hardworking individual")
+    - Mention 1–2 specific qualifications from resume that align with the job
+    - Include the company or role name
+    - End with a brief call to action
+
+    Respond with ONLY the cover letter text.
+
     """
     
     try:

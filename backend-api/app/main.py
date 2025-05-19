@@ -1,6 +1,11 @@
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import auth, letters, resumes
+
+# Load environment variables before anything else
+load_dotenv()
+
+from app.routes import letters, resumes
 
 app = FastAPI()
 
@@ -14,7 +19,7 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(auth.router)
+# app.include_router(auth.router)
 app.include_router(letters.router)
 app.include_router(resumes.router)
 

@@ -1,10 +1,10 @@
 document.getElementById('captureBtn').addEventListener('click', async () => {
     try {
       const response = await chrome.runtime.sendMessage({action: "fetchSelectedText"});
-      document.getElementById('result').textContent = 
+      document.getElementById('job_description').textContent = 
         response?.text || "No text highlighted";
     } catch (error) {
       console.error("Error:", error);
-      document.getElementById('result').textContent = "Error capturing text";
+      document.getElementById('job_description').textContent = "Error capturing text";
     }
   });
