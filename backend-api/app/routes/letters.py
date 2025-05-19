@@ -19,8 +19,7 @@ async def generate_letter(
     user: dict = Depends(verify_supabase_token)
 ):
     # Get resume text from storage or database
-    from .resumes import resume_text
-    resume_text = resume_text#"No jobs yet, but I am a strong learner" #get_resume_for_user(user['sub'])
+    resume_text = "No jobs yet, but I am a strong learner" #get_resume_for_user(user['sub'])
     
     # Generate cover letter
     letter_content, error = await generate_cover_letter(
@@ -37,7 +36,7 @@ async def generate_letter(
     letter_id = str(uuid.uuid4())
     letters_db[letter_id] = {
         "id": letter_id,
-        "user_id": user.get("sub") or "7546ab7b-20a2-4941-8453-f064ea60903f",
+        "user_id": user.get("sub") or "7546ab7b-20a2-4941-8453-f064ea60903f", # Temporary placeholder for user ID
         "content": letter_content,
         "job_description": request.job_description,
         "created_at": datetime.now().isoformat()

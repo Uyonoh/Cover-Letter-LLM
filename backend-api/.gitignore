@@ -59,6 +59,7 @@ venv.bak/
 # Log files
 *.log
 logs/
+TODO.md
 
 # macOS
 .DS_Store

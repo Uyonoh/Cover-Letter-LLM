@@ -11,9 +11,14 @@
     "activeTab",
     "scripting",
     "contextMenus",
-    "storage"
+    "storage",
+    "identity"
   ],
   "host_permissions": ["http://127.0.0.1:8000/*"],
+  "oauth2": {
+    "client_id": "your-google-oauth-client-id.apps.googleusercontent.com",
+    "scopes": ["openid", "email", "profile"]
+  },
   "background": {
     "service_worker": "background.js"
   }
