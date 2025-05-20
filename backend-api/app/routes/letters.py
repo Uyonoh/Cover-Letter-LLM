@@ -42,14 +42,12 @@ async def generate_letter(
         "created_at": datetime.now().isoformat()
     }
     response = supabase.table("letters").insert(letters_db[letter_id]).execute()
-    print(response)
 
     return letters_db#[letter_id]
 
 @router.get("/", response_model=List[CoverLetterResponse])
 async def list_letters(user: dict = Depends(verify_supabase_token)):
     response: CoverLetterResponse = (supabase.table("letters").select("*").execute())#.eq("user_id", user.get("sub")).execute()
-    print(response.data)
     # return response.data
     return [
         letter for letter in response.data
