@@ -1,26 +1,23 @@
 import React from "react";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { APIRoot, getAuthToken } from "../services/api";
 
 function GenerateLetter() {
-  const [jobDescription, setJobDescription] = useState("");
+  const [jobDescription, setJobDescription] = useState<string>("");
+  const navigate = useNavigate();
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-
-    const token = localStorage.getItem("token");
-
+  async function generateLetter(token: string) {
     try {
-      const response = await fetch(
-        "http://127.0.0.1:8000/letters/generate-letter",
-        {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ job_description: jobDescription }),
-        }
-      );
+      console.log("token: ", token);
+      const response = await fetch(APIRoot + "/letters/generate-letter", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ job_description: jobDescription }),
+      });
 
       const data = await response.json();
       console.log("Success:", data);
@@ -30,7 +27,20 @@ function GenerateLetter() {
     } finally {
       // Reset form
       setJobDescription("");
+      // Redirect
+      navigate("/letters");
     }
+  }
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    getAuthToken()
+    .then((token) => {
+      generateLetter(token);
+    })
+
+    
   };
 
   return (
