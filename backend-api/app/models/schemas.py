@@ -1,6 +1,9 @@
 from pydantic import BaseModel
 from typing import Optional
 
+class TokenResponse(BaseModel):
+    token: str
+
 class CoverLetterRequest(BaseModel):
     job_description: str
 

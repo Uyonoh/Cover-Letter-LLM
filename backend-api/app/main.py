@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 # Load environment variables before anything else
 load_dotenv()
 
-from app.routes import letters, resumes
+from app.routes import letters, resumes, auth
 
 app = FastAPI()
 
@@ -22,6 +22,7 @@ app.add_middleware(
 # app.include_router(auth.router)
 app.include_router(letters.router)
 app.include_router(resumes.router)
+app.include_router(auth.router)
 
 @app.get("/")
 def read_root():

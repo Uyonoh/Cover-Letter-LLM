@@ -1,6 +1,8 @@
-import { UUID } from "crypto";
 import { useEffect, useState } from "react";
 import React from "react";
+import { APIRoot, getAuthToken } from "../services/api";
+
+type UUID = string;
 
 interface Letter {
   id: UUID;
@@ -23,11 +25,9 @@ export function useLetters(): useLetterResult {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    async function fetchLetters() {
+    async function fetchLetters(token: string) {
       try {
-        const response = await fetch("http://localhost:8080/api/letters", {
+        const response = await fetch(APIRoot + "/letters", {
           method: "GET",
           headers: {
             "content-type": "application/json",
@@ -48,7 +48,16 @@ export function useLetters(): useLetterResult {
       }
     }
 
-    fetchLetters();
+    getAuthToken()
+    .then((token) => {
+      if (!token) {
+        setError("No token found");
+        return;
+      }
+      fetchLetters(token);
+    })
+    
+    
   }, []);
 
   return { letters, loading, error };

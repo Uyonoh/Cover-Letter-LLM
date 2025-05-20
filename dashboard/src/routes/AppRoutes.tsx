@@ -7,9 +7,9 @@ import Letters from '../pages/Letters';
 function AppRoutes() {
     return (
       <Routes>
-        <Route path="/" element={<Home />} />
         <Route path="/letters" element={<Letters />} />
         <Route path="/letters/generate-letter" element={<GenerateLetter />} />
+        <Route path="/" element={<Home />} />
       </Routes>
     );
 }
