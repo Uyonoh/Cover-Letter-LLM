@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, UploadFile, HTTPException
 from app.utils.security import verify_supabase_token
 from typing import Optional
 import os
-from app.services.db import supabase
+from app.services.db import get_supabase_client
 
 router = APIRouter(prefix="/resumes", tags=["resumes"])
 

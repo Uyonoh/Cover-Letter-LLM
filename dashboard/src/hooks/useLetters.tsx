@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import React from "react";
-import { APIRoot, getAuthToken } from "../services/api";
+import { APIRoot, getAuthToken } from "../services/API";
 
 type UUID = string;
 
@@ -36,6 +36,7 @@ export function useLetters(): useLetterResult {
         });
 
         if (!response.ok) {
+          console.log(response.text())
           throw new Error("Failed to fetch cover letters");
         }
 

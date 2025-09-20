@@ -12,33 +12,33 @@ async function verifyToken(token: string): Promise<boolean> {
 
 
 
-async function getAuthToken(): Promise<string> {
+async function getAuthToken(): Promise<string|null> {
     // Get the auth token from local storage if it exists
     try {
-        const token = localStorage.getItem("token");
-        if (token) {
-            return token;
-        }
+        const token = localStorage.getItem("access_token");
+        return token;
     } catch (error) {
         console.error(error);
+        return null;
     }
 
-    // No token in local storage, get from API
-    try {
-        const response =await fetch(APIRoot + "/auth/token", {
-            headers: {
-                "Content-Type": "application/json"
-            },
-        });
-        const data = await response.json();
+    // // No token in local storage, get from API
+    // try {
+    //     const response =await fetch(APIRoot + "/auth/token", {
+    //         headers: {
+    //             "Content-Type": "application/json"
+    //         },
+    //     });
+    //     const data = await response.json();
         
-        //Store token in local storage and return it
-        localStorage.setItem("token", data.token);
-        return data.token;
-    } catch (error) {
-        console.error(error);
-        return "";
-    }
+    //     //Store token in local storage and return it
+    //     localStorage.setItem("access_token", data.token);
+    //     return data.token;
+    // } catch (error) {
+    //     console.error(error);
+    //     return "";
+    // }
 }
+
 
 export { APIRoot, getAuthToken };

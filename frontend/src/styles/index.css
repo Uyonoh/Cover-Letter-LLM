@@ -1,0 +1,10 @@
+.hero {
+    background-image:
+        linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), /* Black overlay with 50% opacity */
+        url("https://lh3.googleusercontent.com/aida-public/AB6AXuBWWHoZa_tSNQY_z5W2SLnzvkICqjAh-Sk9Ynoq7xRClpuSC5WbDa8C9kpERgOpzz0hYWdmJewc8BCgSoZj388ervDaeNqfR_Hp4bkctk9IcGu79t9OX-BZHEMvNbftjR4oJQz1dIRn3JPIfLQPkyAtsSVZJOYXE8vuWSyqOLW3X__wAuGXnyJuhYENVaeDjk_JSxf-Y8JMJ1MvfcWeqaqECHCb_jSZ6wS7-hRD4Wuvdc3lYQu2gVxNwwZ1RLCXxvxUTUTVKX_w31hb");
+        
+    /* background-repeat: no-repeat; /* Prevents the image from tiling */
+    /* background-position: center center; /* Centers the image horizontally and vertically */
+    /* background-size: cover; /* The key property for covering the area */
+}
+

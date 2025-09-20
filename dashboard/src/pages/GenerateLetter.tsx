@@ -1,13 +1,13 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { APIRoot, getAuthToken } from "../services/api";
+import { APIRoot, getAuthToken } from "../services/API";
 
 function GenerateLetter() {
   const [jobDescription, setJobDescription] = useState<string>("");
   const navigate = useNavigate();
 
-  async function generateLetter(token: string) {
+  async function generateLetter(token: string|null): Promise<void> {
     try {
       console.log("token: ", token);
       const response = await fetch(APIRoot + "/letters/generate-letter", {

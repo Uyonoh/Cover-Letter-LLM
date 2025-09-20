@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from app.services.ai import generate_cover_letter
 from app.utils.security import verify_supabase_token
 from app.models.schemas import CoverLetterRequest, CoverLetterResponse
-from app.services.db import supabase
+from app.services.db import get_supabase_client, Client
 from typing import List
 import uuid
 from datetime import datetime
@@ -16,7 +16,8 @@ letters_db = {}
 @router.post("/generate-letter")
 async def generate_letter(
     request: CoverLetterRequest,
-    user: dict = Depends(verify_supabase_token)
+    user: dict = Depends(verify_supabase_token),
+    supabase: Client = Depends(get_supabase_client)
 ):
     # Get resume text from storage or database
     resume_text = "No jobs yet, but I am a strong learner" #get_resume_for_user(user['sub'])
@@ -35,18 +36,20 @@ async def generate_letter(
     
     letter_id = str(uuid.uuid4())
     letters_db[letter_id] = {
-        "id": letter_id,
-        "user_id": user.get("sub") or "7546ab7b-20a2-4941-8453-f064ea60903f", # Temporary placeholder for user ID
+        "user_id": uuid.UUID(user.get("sub")) or "7546ab7b-20a2-4941-8453-f064ea60903f", # Temporary placeholder for user ID
         "content": letter_content,
         "job_description": request.job_description,
         "created_at": datetime.now().isoformat()
     }
-    response = supabase.table("letters").insert(letters_db[letter_id]).execute()
+    supabase.table("letters").insert(letters_db[letter_id]).execute()
 
     return letters_db#[letter_id]
 
 @router.get("/", response_model=List[CoverLetterResponse])
-async def list_letters(user: dict = Depends(verify_supabase_token)):
+async def list_letters(
+    user: dict = Depends(verify_supabase_token),
+    supabase: Client = Depends(get_supabase_client)
+    ):
     response: CoverLetterResponse = (supabase.table("letters").select("*").execute())#.eq("user_id", user.get("sub")).execute()
     # return response.data
     return [
@@ -57,7 +60,8 @@ async def list_letters(user: dict = Depends(verify_supabase_token)):
 @router.get("/{letter_id}", response_model=CoverLetterResponse)
 async def get_letter(
     letter_id: str,
-    user: dict = Depends(verify_supabase_token)
+    user: dict = Depends(verify_supabase_token),
+    supabase: Client = Depends(get_supabase_client)
 ):
     letter = letters_db.get(letter_id)
     if not letter or letter["user_id"] != user.get("sub"):
