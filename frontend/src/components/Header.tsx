@@ -1,4 +1,5 @@
 import Link from "next/link";
+ import { Menu } from "lucide-react";
 
 function Header() {
     return(
@@ -6,7 +7,9 @@ function Header() {
             <header className="py-5 px-5 sm:px-7 md:px-10 relative flex justify-between border-b border-[#0f3760]">
                 <div className="logo">CoverLetterLLM</div>
 
-                <div className="absolute md:hidden top-5 right-5">##</div>
+                <div className="absolute md:hidden top-5 right-5">
+                    <Menu />
+                </div>
                 {/* Desktop nav */}
                 <nav className="hidden md:flex">
                     <ul className="flex gap-5">
