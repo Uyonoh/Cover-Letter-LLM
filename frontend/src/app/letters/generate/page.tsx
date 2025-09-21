@@ -25,6 +25,8 @@ function Generate() {
                         </div>
                     </form>
                 </div>
+
+                {/* Right on larger screens, wrap under on small screen */}
                 <div className="custumization  sm:col-span-3 sm:pl-5 flex flex-col gap-7">
                     <h3 className="font-bold text-xl text-white pt-2">Customization</h3>
                     {/* Letter Style */}
