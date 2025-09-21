@@ -1,16 +1,20 @@
+
 import { Paperclip } from "lucide-react";
+import  { handleSubmit } from "@/utils/actions";
 
 function Generate() {
+    
+
     return (
         <div className="py-5 px-5 sm:px-7 md:px-10 text-white/80">
-            <div className="sm:grid sm:grid-cols-12">
+            <form action={handleSubmit} className="sm:grid sm:grid-cols-12">
                 <div className="description col-span-9 sm:border-r sm:border-secondary/80 sm:pr-5 sm:min-h-screen">
                     <h2 className="font-bold text-2xl text-white">Generate Your Cover Letter</h2>
                     <p className="text-base py-1">
                         Create a tailored cover letter in seconds by providing a job description
                     </p>
 
-                    <form action="" method="post" className="flex flex-col gap-5 py-10">
+                    <div className="flex flex-col gap-5 py-10">
                         <textarea name="job-description" id="job-description"
                             placeholder="Paste the job description here or upload a file"
                             className="text-white w-full h-50 sm:h-[60vh] border border-secondary rounded-sm p-2
@@ -21,9 +25,9 @@ function Generate() {
                                 <Paperclip size={18} className="" />
                                 Upload File
                             </button>
-                            <button className="rounded-lg px-4 py-2 hidden sm:block bg-primary cursor-pointer text-white hover:bg-primary/90 transition-colors">Generate Cover Letter</button>
+                            <button type="submit" className="rounded-lg px-4 py-2 hidden sm:block bg-primary cursor-pointer text-white hover:bg-primary/90 transition-colors">Generate Cover Letter</button>
                         </div>
-                    </form>
+                    </div>
                 </div>
 
                 {/* Right on larger screens, wrap under on small screen */}
@@ -99,8 +103,8 @@ function Generate() {
                     </div>
                     {/* TODO: Add custom prompt text area */}
                 </div>
-                <button className="rounded-lg p-2 sm:hidden bg-primary w-full my-7 cursor-pointer">Generate Cover Letter</button>
-            </div>
+                <button type="submit" className="rounded-lg p-2 sm:hidden bg-primary w-full my-7 cursor-pointer">Generate Cover Letter</button>
+            </form>
         </div>
     );
 }
