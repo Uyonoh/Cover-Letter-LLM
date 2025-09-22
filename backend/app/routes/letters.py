@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
-from app.services.db import get_supabase_client, verify_supabase_token, Client
-from app.models.schemas import CoverLetterRequest, CoverLetterResponse, datetime, uuid, Any
+from app.services.db import get_supabase_client, verify_token, Client
+from app.models.schemas import CoverLetterRequest, CoverLetter, datetime, uuid, Any
 
 router = APIRouter(prefix="/letters", tags=["letters"])
 
@@ -11,20 +11,47 @@ letters_db = {}
 @router.post("")
 async def generate(
     request: CoverLetterRequest,
-    user: dict = Depends(verify_supabase_token),
+    user: dict = Depends(verify_token),
     supabase: Client = Depends(get_supabase_client)
 ) -> dict[str, Any]:
-    letter_id = str(uuid.uuid4())
-    letter_content = "Random bullshit GO!!!"
-    job_title = "Random JOb"
-    letters_db[letter_id] = {
-        # "id": letter
-        "user_id": "7546ab7b-20a2-4941-8453-f064ea60903f", # Temporary placeholder for user ID
-        "text": letter_content,
-        "job_title": job_title,
-        "job_description": "",#request.job_description,
-        "created_at": datetime.now().isoformat()
+    
+    user_id: str = user.get("sub") or "7546ab7b-20a2-4941-8453-f064ea60903f"
+    content = ""
+    job = {
+        "user_id": user_id,
+        "title": request.job_title,
+        "company": "NIL",
+        "description": request.job_description,
+    }
+    res = supabase.table("jobs").insert(job).execute()
+    job_id = res.data[0].get("id")
+    # content = predict(request.job_title, request.job_description)
+
+    data: CoverLetter = {
+        "user_id": user_id,
+        "job_id": job_id,
+        "content": content,
+        "version": 1,
     }
 
-    supabase.table("letters").insert(letters_db[letter_id]).execute()
-    return letters_db[letter_id]
+    res = supabase.table("cover_letters").insert(data).execute()
+    letter_id = res.data[0].get("id")
+
+    return letter_id
+
+
+
+
+
+
+
+
+
+# letters_db[letter_id] = {
+#         # "id": letter
+#         "user_id": "7546ab7b-20a2-4941-8453-f064ea60903f", # Temporary placeholder for user ID
+#         "text": letter_content,
+#         "job_title": job_title,
+#         "job_description": "",#request.job_description,
+#         "created_at": datetime.now().isoformat()
+#     }

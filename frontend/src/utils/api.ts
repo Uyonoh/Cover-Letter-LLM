@@ -51,7 +51,10 @@ async function generateCoverLetter({job, token}: {job: Job, token: string}):Prom
         }
         )
         if (!response.ok) {
-            throw new Error("Failed to generate cover letter")
+            throw new Error(`
+                Failed to generate cover letter with error: ${response.status} \n
+                ::: ${response.statusText}
+                `);
         }
 
         const data: CoverLetterResponse = await response.json();

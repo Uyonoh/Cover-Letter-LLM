@@ -1,6 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException
-from fastapi.security import HTTPBearer
-from jose import jwt
+from fastapi import FastAPI
 import os
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,9 +6,6 @@ from app.routes import letters
 
 load_dotenv()
 app = FastAPI()
-security = HTTPBearer()
-
-SUPABASE_JWT_SECRET  = os.getenv("SUPABASE_JWT_SECRET")
 
 # CORS config
 app.add_middleware(
@@ -25,16 +20,26 @@ app.add_middleware(
 async def root():
     return {"status": "Cover Letter Generator API is running"}
 
-def verify_token(token: str = Depends(security)):
-    try:
-        payload = jwt.decode(token.credentials, SUPABASE_JWT_SECRET, algorithms=["HS256"])
-        return payload
-    except Exception:
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
-
+from app.services.db import get_supabase_client, verify_token, Client
+from fastapi import Depends, HTTPException
 @app.get("/protected")
-def protected_route(user=Depends(verify_token)):
-    return {"message": "Hello from FastAPI!", "user": user}
+async def protected_route(
+    supabase: Client = Depends(get_supabase_client)):
+    access_token:str = "eyJhbGciOiJIUzI1NiIsImtpZCI6IjBkT1RaYy9UdFN3M3crRUwiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2ZtZ3hhZXJhcGJvZmRtYXhqZ2JxLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiJmNzQwOTM3Zi01NWMyLTQ4MmUtODM0Ny0xOWZlNWYxZTk5YWIiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzU4NTUzNTI0LCJpYXQiOjE3NTg1NDk5MjQsImVtYWlsIjoidHVyYWtpdXlvbm9oQGdtYWlsLmNvbSIsInBob25lIjoiIiwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiZW1haWwiLCJwcm92aWRlcnMiOlsiZW1haWwiXX0sInVzZXJfbWV0YWRhdGEiOnsiZW1haWwiOiJ0dXJha2l1eW9ub2hAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInBob25lX3ZlcmlmaWVkIjpmYWxzZSwic3ViIjoiZjc0MDkzN2YtNTVjMi00ODJlLTgzNDctMTlmZTVmMWU5OWFiIn0sInJvbGUiOiJhdXRoZW50aWNhdGVkIiwiYWFsIjoiYWFsMSIsImFtciI6W3sibWV0aG9kIjoicGFzc3dvcmQiLCJ0aW1lc3RhbXAiOjE3NTg1NDk5MjR9XSwic2Vzc2lvbl9pZCI6ImE4NGU5ODFiLTY0YjQtNGQ2YS04MDJmLTU0MDI2YWE2MjVmMCIsImlzX2Fub255bW91cyI6ZmFsc2V9.kloq6zZJWmTGOqxtowVct1F9yIZrMcUcsp6uT_duWqo"
+    try:
+        # Use the provided Supabase access token to get the user
+        # response = await supabase.auth.get_user()
+        response = await supabase.auth.get_session()
+        user_data = response.user.dict()
+
+        if response.user is None:
+            return {"detail": "No user"}
+
+        return user_data
+
+    except Exception as e:
+        # Handle cases like expired tokens gracefully
+        return {"detail": f"Invalid or expired token: {e}"}
 
 # Include routers
 app.include_router(letters.router)
