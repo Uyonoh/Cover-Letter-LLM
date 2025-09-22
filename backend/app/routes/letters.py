@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from app.services.db import get_supabase_client, verify_supabase_token, Client
 from app.models.schemas import CoverLetterRequest, CoverLetterResponse, datetime, uuid, Any
 
 router = APIRouter(prefix="/letters", tags=["letters"])
@@ -7,9 +8,11 @@ router = APIRouter(prefix="/letters", tags=["letters"])
 letters_db = {}
 
 # Generate returns status code and message, redirects to view
-@router.post("/generate/")
+@router.post("")
 async def generate(
-    # request: CoverLetterRequest
+    request: CoverLetterRequest,
+    user: dict = Depends(verify_supabase_token),
+    supabase: Client = Depends(get_supabase_client)
 ) -> dict[str, Any]:
     letter_id = str(uuid.uuid4())
     letter_content = "Random bullshit GO!!!"
@@ -17,10 +20,11 @@ async def generate(
     letters_db[letter_id] = {
         # "id": letter
         "user_id": "7546ab7b-20a2-4941-8453-f064ea60903f", # Temporary placeholder for user ID
-        "letter": letter_content,
+        "text": letter_content,
         "job_title": job_title,
         "job_description": "",#request.job_description,
         "created_at": datetime.now().isoformat()
     }
 
+    supabase.table("letters").insert(letters_db[letter_id]).execute()
     return letters_db[letter_id]

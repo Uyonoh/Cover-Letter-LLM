@@ -1,23 +1,42 @@
-
+"use client";
+import { useState, useEffect } from "react";
 import { Paperclip } from "lucide-react";
 import  { handleSubmit } from "@/utils/actions";
+import { InputHTMLAttributes } from "react";
 
 function Generate() {
-    
+    const [token, setToken] = useState<string>("");
+
+    useEffect(() => {
+    // This code runs only on the client
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+    if (supabaseUrl) {
+      // Safely handle the environment variable
+      const root = supabaseUrl.split('.')[0];
+      const id = root.split('//')[1];
+      const token = localStorage.getItem(`sb-${id}-auth-token`);
+      setToken(token ? token: "");
+    }
+  }, []);
 
     return (
         <div className="py-5 px-5 sm:px-7 md:px-10 text-white/80">
             <form action={handleSubmit} className="sm:grid sm:grid-cols-12">
+                <input type="hidden" name="token" id="token" value={token} />
                 <div className="description col-span-9 sm:border-r sm:border-secondary/80 sm:pr-5 sm:min-h-screen">
                     <h2 className="font-bold text-2xl text-white">Generate Your Cover Letter</h2>
                     <p className="text-base py-1">
                         Create a tailored cover letter in seconds by providing a job description
                     </p>
 
-                    <div className="flex flex-col gap-5 py-10">
+                    <div className="flex flex-col gap-5 py-5">
+                        <input type="text" name="job-title" id="job-title" placeholder="Enter the Job Title"
+                            className="bg-secondary/10 text-white border border-secondary rounded-lg py-2 px-4 max-w-[500px]
+                                        focus:border-primary focus:ring-0 focus:outline-none text-lg"/>
                         <textarea name="job-description" id="job-description"
                             placeholder="Paste the job description here or upload a file"
-                            className="text-white w-full h-50 sm:h-[60vh] border border-secondary rounded-sm p-2
+                            className="text-white w-full h-50 sm:h-[50vh] border border-secondary rounded-sm p-2
                             focus:border-primary focus:ring-0 focus:outline-none">
                         </textarea>
                         <div className="flex justify-center sm:justify-between items-center">

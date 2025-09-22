@@ -5,6 +5,12 @@ description = "Backend server for cover letter ai"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "asyncpg>=0.30.0",
     "fastapi[standard]>=0.117.1",
+    "psycopg2>=2.9.10",
     "python-dotenv>=1.1.1",
+    "python-jose[cryptography]>=3.5.0",
+    "requests>=2.32.5",
+    "supabase>=2.19.0",
+    "uvicorn>=0.36.0",
 ]
