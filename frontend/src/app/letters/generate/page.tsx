@@ -1,29 +1,31 @@
 "use client";
-import { useState, useEffect } from "react";
+
+import { useState } from "react";
 import { Paperclip } from "lucide-react";
-import  { handleSubmit } from "@/utils/actions";
-import { InputHTMLAttributes } from "react";
+import { apiFetch } from "@/utils/api";
 
 function Generate() {
-    const [token, setToken] = useState<string>("");
+    const [jobTitle, setJobTitle] = useState("");
+    const [jobDescription, setJobDescription] = useState("");
 
-    useEffect(() => {
-    // This code runs only on the client
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    async function handleGenerateLetter(){
+        const res = await apiFetch("/letters", {
+            method: "POST",
+            body: JSON.stringify({ jobTitle, jobDescription }),
+        });
 
-    if (supabaseUrl) {
-      // Safely handle the environment variable
-      const root = supabaseUrl.split('.')[0];
-      const id = root.split('//')[1];
-      const token = localStorage.getItem(`sb-${id}-auth-token`);
-      setToken(token ? token: "");
+        if (res.ok){
+            alert("SUCCESS!!!!!!!!!!!!!!!!1111");
+            console.log(await res.json());
+        } else {
+            alert("Generation Failed");
+        }
     }
-  }, []);
 
     return (
         <div className="py-5 px-5 sm:px-7 md:px-10 text-white/80">
-            <form action={handleSubmit} className="sm:grid sm:grid-cols-12">
-                <input type="hidden" name="token" id="token" value={token} />
+            <form action={handleGenerateLetter} className="sm:grid sm:grid-cols-12">
+                <input type="hidden" name="token" id="token" value="" />
                 <div className="description col-span-9 sm:border-r sm:border-secondary/80 sm:pr-5 sm:min-h-screen">
                     <h2 className="font-bold text-2xl text-white">Generate Your Cover Letter</h2>
                     <p className="text-base py-1">
@@ -33,11 +35,13 @@ function Generate() {
                     <div className="flex flex-col gap-5 py-5">
                         <input type="text" name="job-title" id="job-title" placeholder="Enter the Job Title"
                             className="bg-secondary/10 text-white border border-secondary rounded-lg py-2 px-4 max-w-[500px]
-                                        focus:border-primary focus:ring-0 focus:outline-none text-lg"/>
+                                        focus:border-primary focus:ring-0 focus:outline-none text-lg"
+                            onChange={(e) => setJobTitle(e.target.value)}/>
                         <textarea name="job-description" id="job-description"
                             placeholder="Paste the job description here or upload a file"
                             className="text-white w-full h-50 sm:h-[50vh] border border-secondary rounded-sm p-2
-                            focus:border-primary focus:ring-0 focus:outline-none">
+                            focus:border-primary focus:ring-0 focus:outline-none"
+                            onChange={(e) => setJobDescription(e.target.value)}>
                         </textarea>
                         <div className="flex justify-center sm:justify-between items-center">
                             <button className="flex gap-2 items-center rounded-lg px-4 py-2 border border-secondary cursor-pointer hover:bg-gray-700">

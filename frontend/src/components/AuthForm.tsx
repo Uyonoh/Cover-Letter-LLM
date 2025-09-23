@@ -2,6 +2,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/utils/supabaseClient";
+import { apiFetch } from "@/utils/api";
+// import { handleLogin } from "@/utils/actions";
 
 
 export default function AuthForm() {
@@ -15,12 +17,25 @@ export default function AuthForm() {
     else alert("Signup successful! Check your email.");
   }
 
-  const handleLogin = async () => {
-    console.log(supabase);
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-    console.log("Tok:", data.session?.access_token);
-    if (error) alert(error.message)
-    else router.push("/letters/generate");
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault();
+
+    try {
+      const res = await apiFetch("/auth/login", {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (res.ok) {
+        // router.push("/letters/generate"); // redirect after login
+        console.log("logged in");
+      } else {
+        alert("Login failed");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error logging in");
+    }
   }
 
   return (

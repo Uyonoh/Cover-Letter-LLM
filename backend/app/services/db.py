@@ -2,6 +2,7 @@ from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBearer
 from jose import jwt
 from supabase import create_client, Client
+from supabase_auth.types import User
 import os
 
 security = HTTPBearer()

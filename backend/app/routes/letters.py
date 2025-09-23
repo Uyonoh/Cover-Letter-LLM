@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
-from app.services.db import get_supabase_client, verify_token, Client
+from app.dependencies import get_current_user
+from app.services.db import get_supabase_client, verify_token, Client, User
 from app.models.schemas import CoverLetterRequest, CoverLetter, datetime, uuid, Any
 
 router = APIRouter(prefix="/letters", tags=["letters"])
@@ -11,11 +12,11 @@ letters_db = {}
 @router.post("")
 async def generate(
     request: CoverLetterRequest,
-    user: dict = Depends(verify_token),
+    user: User = Depends(get_current_user),
     supabase: Client = Depends(get_supabase_client)
 ) -> dict[str, Any]:
-    
-    user_id: str = user.get("sub") or "7546ab7b-20a2-4941-8453-f064ea60903f"
+
+    user_id: str = user.id or "7546ab7b-20a2-4941-8453-f064ea60903f"
     content = ""
     job = {
         "user_id": user_id,

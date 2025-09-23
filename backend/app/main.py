@@ -2,15 +2,19 @@ from fastapi import FastAPI
 import os
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import letters
+from app.routes import letters, auth
 
 load_dotenv()
 app = FastAPI()
 
 # CORS config
+origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -42,4 +46,5 @@ async def protected_route(
         return {"detail": f"Invalid or expired token: {e}"}
 
 # Include routers
+app.include_router(auth.router)
 app.include_router(letters.router)
