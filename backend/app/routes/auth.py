@@ -21,7 +21,7 @@ async def login(
 
     # Set secure httpOnly cookie
     response.set_cookie(
-        key="access_token",
+        key="sb_access_token",
         value=access_token,
         httponly=True,
         secure=False,  # only over HTTPS in production
@@ -29,4 +29,4 @@ async def login(
         expires=60 * 60 * 24  # 1 day
     )
 
-    return {"message": "Login successful"}
+    return {"access_token": access_token}

@@ -1,8 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, Request, HTTPException
 from app.dependencies import get_current_user
 from app.services.db import get_supabase_client, verify_token, Client, User
 from app.models.schemas import CoverLetterRequest, CoverLetter, datetime, uuid, Any
+import os
 
+ENV = os.getenv("ENV", "dev")
 router = APIRouter(prefix="/letters", tags=["letters"])
 
 # In-memory storage for demo (replace with Supabase in production)
@@ -11,18 +13,25 @@ letters_db = {}
 # Generate returns status code and message, redirects to view
 @router.post("")
 async def generate(
-    request: CoverLetterRequest,
+    request: Request,
+    body: CoverLetterRequest,
     user: User = Depends(get_current_user),
     supabase: Client = Depends(get_supabase_client)
 ) -> dict[str, Any]:
 
-    user_id: str = user.id or "7546ab7b-20a2-4941-8453-f064ea60903f"
+    if ENV == "dev":
+        auth = request.headers.get("authorization")
+        if auth and auth.startswith("Bearer "):
+            token = auth.split(" ")[1]
+        supabase.postgrest.auth(token)
+
+    user_id: str = user.id
     content = ""
     job = {
         "user_id": user_id,
-        "title": request.job_title,
+        "title": body.job_title,
         "company": "NIL",
-        "description": request.job_description,
+        "description": body.job_description,
     }
     res = supabase.table("jobs").insert(job).execute()
     job_id = res.data[0].get("id")

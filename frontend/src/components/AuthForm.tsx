@@ -27,7 +27,9 @@ export default function AuthForm() {
       });
 
       if (res.ok) {
-        // router.push("/letters/generate"); // redirect after login
+        const data = await res.json();
+        localStorage.setItem("access_token", data.access_token);
+        router.push("/letters/generate"); // redirect after login
         console.log("logged in");
       } else {
         alert("Login failed");

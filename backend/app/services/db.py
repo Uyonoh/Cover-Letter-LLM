@@ -2,6 +2,7 @@ from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBearer
 from jose import jwt
 from supabase import create_client, Client
+from supabase.client import ClientOptions
 from supabase_auth.types import User
 import os
 
@@ -12,7 +13,15 @@ SUPABASE_JWT_SECRET  = os.getenv("SUPABASE_JWT_SECRET")
 def get_supabase_client():
     url = os.getenv("SUPABASE_URL")
     key = os.getenv("SUPABASE_KEY")
-    supabase: Client = create_client(url, key)
+    supabase: Client = create_client(
+        url,
+        key,
+        options=ClientOptions(
+            postgrest_client_timeout=60,
+            storage_client_timeout=60,
+            schema="public",
+        )
+    )
 
     return supabase
 
