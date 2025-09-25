@@ -17,7 +17,7 @@ def get_supabase_client():
         url,
         key,
         options=ClientOptions(
-            postgrest_client_timeout=60,
+            postgrest_client_timeout=120,
             storage_client_timeout=60,
             schema="public",
         )

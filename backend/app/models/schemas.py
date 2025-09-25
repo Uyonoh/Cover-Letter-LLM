@@ -11,14 +11,26 @@ class User(BaseModel):
     hashed_password: str
     created_at: datetime
 
-class UserCreate(BaseModel):
+class UserCreateForm(BaseModel):
+    email: str
+    password: str
+    first_name: str
+    last_name: str
+
+class UserProfile(BaseModel):
+    id: UUID
+    first_name: str
+    last_name: str
+    created_at: datetime
+
+class UserLoginForm(BaseModel):
     email: str
     password: str
 
 class TokenResponse(BaseModel):
     token: str
 
-class CoverLetterRequest(BaseModel):
+class CoverLetterForm(BaseModel):
     job_title: str
     job_description: str
 

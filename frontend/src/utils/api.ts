@@ -1,10 +1,15 @@
 import { supabase } from "./supabaseClient";
 
 const apiRoot = process.env.NEXT_PUBLIC_API?.toString();
+
+interface apiError {
+    message: string;
+};
+
 interface Job {
   jobTitle: string | undefined;
   jobDescription: string | undefined;
-}
+};
 
 interface CoverLetterResponse {
   id: string;
@@ -15,12 +20,12 @@ interface CoverLetterResponse {
   // prompt: string;
   created_at: string;
   // updated_at: string;
-}
+};
 
 interface loginProps {
   email: string;
   password: string;
-}
+};
 
 async function fetchProtected() {
   const session = await supabase.auth.getSession();
@@ -46,13 +51,6 @@ async function apiFetch(path: string, options: RequestInit = {}) {
       ...(options.headers || {}),
     },
   });
-
-  if (!res.ok) {
-    throw new Error(`
-      API request failed: ${res.status}
-      ${await res.text()}
-      `);
-  }
 
   return res;
 }
@@ -115,22 +113,5 @@ async function login({ user }: { user: loginProps }) {
   return "";
 }
 
-export type { CoverLetterResponse, loginProps };
+export type { apiError, CoverLetterResponse, loginProps };
 export { apiFetch, fetchProtected, generateCoverLetter, login };
-
-const x = {
-  detail: [
-    {
-      type: "missing",
-      loc: ["body", "email"],
-      msg: "Field required",
-      input: { user: { email: "eflwgnk", password: "wrgkonl" } },
-    },
-    {
-      type: "missing",
-      loc: ["body", "password"],
-      msg: "Field required",
-      input: { user: { email: "eflwgnk", password: "wrgkonl" } },
-    },
-  ],
-};

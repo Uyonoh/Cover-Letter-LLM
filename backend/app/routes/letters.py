@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Request, HTTPException
 from app.dependencies import get_current_user
 from app.services.db import get_supabase_client, verify_token, Client, User
-from app.models.schemas import CoverLetterRequest, CoverLetter, datetime, uuid, Any
+from app.models.schemas import CoverLetterForm, CoverLetter, datetime, uuid, Any
 import os
 
 ENV = os.getenv("ENV", "dev")
@@ -14,7 +14,7 @@ letters_db = {}
 @router.post("")
 async def generate(
     request: Request,
-    body: CoverLetterRequest,
+    body: CoverLetterForm,
     user: User = Depends(get_current_user),
     supabase: Client = Depends(get_supabase_client)
 ) -> dict[str, Any]:
@@ -47,7 +47,7 @@ async def generate(
     res = supabase.table("cover_letters").insert(data).execute()
     letter_id = res.data[0].get("id")
 
-    return letter_id
+    return {"letter_id": letter_id}
 
 
 
