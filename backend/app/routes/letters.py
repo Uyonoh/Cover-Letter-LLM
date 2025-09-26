@@ -25,14 +25,14 @@ async def get_letters(
 
     res = (
         supabase.table("cover_letters")
-        .select("id, created_at, jobs(title)")
+        .select("id, created_at, jobs(title, company)")
         .eq("user_id", user.id)
         .order("created_at", desc=True)
         .execute()
     )
 
     print(f"REsponse = {res}")
-    headings = ["Title", "Date Created"]
+    headings = ["Title", "Company", "Date Created", "Actions"]
     return {"headings": headings, "letters": res.data}
 
 @router.post("")

@@ -8,6 +8,7 @@ interface apiError {
 
 interface Job {
   title: string | undefined;
+  company: string | undefined;
   description: string | undefined;
 };
 

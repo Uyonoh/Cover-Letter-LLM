@@ -33,6 +33,7 @@ body {
   color: #fff;
   border: 1px solid var(--secondary);
   border-radius: .5rem;
+  padding: 5px 10px;
 }
 
 .form-input:focus {
