@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Request, HTTPException
 from app.dependencies import get_current_user
-from app.services.db import get_supabase_client, verify_token, Client, User
+from app.services.db import get_supabase_client, get_service_client, verify_token, Client, User
 from app.models.schemas import CoverLetterForm, CoverLetter, datetime, uuid, Any
 import os
 
@@ -10,7 +10,31 @@ router = APIRouter(prefix="/letters", tags=["letters"])
 # In-memory storage for demo (replace with Supabase in production)
 letters_db = {}
 
-# Generate returns status code and message, redirects to view
+@router.get("")
+async def get_letters(
+    request: Request,
+    user: User=Depends(get_current_user),
+    supabase: Client=Depends(get_supabase_client),
+    ):
+
+    if ENV == "dev":
+        auth = request.headers.get("authorization")
+        if auth and auth.startswith("Bearer "):
+            token = auth.split(" ")[1]
+        supabase.postgrest.auth(token)
+
+    res = (
+        supabase.table("cover_letters")
+        .select("id, created_at, jobs(title)")
+        .eq("user_id", user.id)
+        .order("created_at", desc=True)
+        .execute()
+    )
+
+    print(f"REsponse = {res}")
+    headings = ["Title", "Date Created"]
+    return {"headings": headings, "letters": res.data}
+
 @router.post("")
 async def generate(
     request: Request,

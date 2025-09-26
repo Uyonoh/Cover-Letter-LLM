@@ -2,6 +2,7 @@
 
 :root {
   --background: #101922;
+  --background-light: #1b2938;
   --foreground: #fff;
   --primary: #0d7ff2;
   --secondary: #888c91;
@@ -10,9 +11,10 @@
 
 @theme inline {
   --color-background: var(--background);
+  --color-background-light: var(--background-light);
   --color-foreground: var(--foreground);
-  --color-primary: #0d7ff2;
-  --color-secondary: #888c91;
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }

@@ -7,8 +7,8 @@ interface apiError {
 };
 
 interface Job {
-  jobTitle: string | undefined;
-  jobDescription: string | undefined;
+  title: string | undefined;
+  description: string | undefined;
 };
 
 interface CoverLetterResponse {
@@ -26,6 +26,11 @@ interface loginProps {
   email: string;
   password: string;
 };
+
+interface letterBrief {
+  jobs: Job;
+  created_at: string;
+}
 
 async function fetchProtected() {
   const session = await supabase.auth.getSession();
@@ -113,5 +118,5 @@ async function login({ user }: { user: loginProps }) {
   return "";
 }
 
-export type { apiError, CoverLetterResponse, loginProps };
+export type { apiError, CoverLetterResponse, loginProps, letterBrief };
 export { apiFetch, fetchProtected, generateCoverLetter, login };
