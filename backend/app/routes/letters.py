@@ -73,19 +73,9 @@ async def generate(
 
     return {"letter_id": letter_id}
 
+from app.services.gemini import generate_text
+@router.get("/test")
+async def gemini():
+    response = await generate_text()
 
-
-
-
-
-
-
-
-# letters_db[letter_id] = {
-#         # "id": letter
-#         "user_id": "7546ab7b-20a2-4941-8453-f064ea60903f", # Temporary placeholder for user ID
-#         "text": letter_content,
-#         "job_title": job_title,
-#         "job_description": "",#request.job_description,
-#         "created_at": datetime.now().isoformat()
-#     }
+    return {"GEN": response}
