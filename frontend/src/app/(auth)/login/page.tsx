@@ -12,12 +12,14 @@ import { apiFetch } from "@/utils/api";
 function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [isProcessing, setIsProcessing] = useState(false);
     const [err, setErr] = useState("");
     const router = useRouter();
 
     async function handleLogin(e: React.FormEvent) {
         e.preventDefault();
         setErr("");
+        setIsProcessing(true);
 
         try {
             const res = await apiFetch("/auth/login", {
@@ -37,6 +39,8 @@ function Login() {
         } catch (err: unknown) {
             setErr("Network error, try again later");
             console.log("ERR: ", err);
+        } finally {
+            setIsProcessing(false);
         }
     }
 
@@ -72,8 +76,14 @@ function Login() {
                 >Sign In</button>
             </div>
 
-            
-
+            {isProcessing && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+                    <div className="flex flex-col gap-7 justify-center items-center h-64">
+                        <h1 className="font-bold text-2xl">Verifying your identity...</h1>
+                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary" />
+                    </div>
+                </div>
+            )}
         </form>
     );
 }

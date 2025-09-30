@@ -4,4 +4,11 @@ const nextConfig: NextConfig = {
   /* config options here */
 };
 
-export default nextConfig;
+module.exports = {
+  nextConfig,
+  images: {
+    remotePatterns: [new URL('https://img.icons8.com/**')],
+  },
+}
+
+// export default nextConfig;

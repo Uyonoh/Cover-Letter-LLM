@@ -1,15 +1,19 @@
 "use client";
 
-import { Search, Pencil, Download } from "lucide-react";
+import { Search, Pencil, Download, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { apiFetch } from "@/utils/api";
 import type { letterBrief } from "@/utils/api";
+import { DeleteConfirmationDialog } from "@/components/DeleteConfirmationDialog";
+
 
 function Letters() {
     const [headings, setHeadings] = useState<string[]>([]);
     const [letters, setLetters] = useState<letterBrief[]>([]);
+    const [searchTerm, setSearchTerm] = useState("");
     const [isLoading, setIsLoading] = useState(true);
+    const [isDialogOpen, setDialogOpen] = useState(false);
 
     useEffect(() => {
         const access_token = localStorage.getItem("access_token");
@@ -34,7 +38,16 @@ function Letters() {
                 setIsLoading(false);
             });
 
-    }, [letters]);
+    }, []);
+
+    function handleDelete ():void {
+        console.log("Deleted");
+    }
+
+    // filtered list (wire in debounce as you like)
+  const filtered = letters.filter((l) =>
+    l.jobs.title?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
     if (isLoading) {
         return (
@@ -54,6 +67,7 @@ function Letters() {
                     <input
                         type="search"
                         placeholder="Search"
+                        onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full pl-10 pr-4 py-2 rounded-md bg-background-light text-white/80 border border-secondary focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                 </div>
@@ -69,7 +83,7 @@ function Letters() {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-secondary">
-                        {letters.map((letter, key) => (
+                        {filtered.map((letter, key) => (
                             <tr key={key} className="hover:bg-background-dark transition">
                                 <td className="px-4 py-3">{letter.jobs.title}</td>
                                 <td className="px-4 py-3">{letter.jobs.company}</td>
@@ -83,16 +97,30 @@ function Letters() {
                                         <Pencil size={16} />
                                         <span>Edit</span>
                                     </Link>
-                                    <button className="hover:underline hover:text-primary flex gap-2 items-center cursor-pointer">
+                                    <Link href="#"
+                                    className="hover:underline hover:text-primary flex gap-2 items-center cursor-pointer">
                                         <Download size={16} />
                                         <span>Download</span>
-                                    </button>
+                                    </Link>
+                                    <span className="hover:underline hover:text-primary flex gap-2 items-center cursor-pointer"
+                                        onClick={() => setDialogOpen(true)}>
+                                        <Trash2 size={16} className="text-red-500" />
+                                        <span>Delete</span>
+                                    </span>
                                 </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
+
+         {/* Delete dialogue */}
+            <DeleteConfirmationDialog
+                isOpen={isDialogOpen}
+                onCancel={() => setDialogOpen(false)}
+                onConfirm={handleDelete}
+            />
+
         </div>
     );
 }
