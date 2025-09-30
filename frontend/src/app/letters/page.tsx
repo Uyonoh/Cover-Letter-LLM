@@ -2,12 +2,14 @@
 
 import { Search, Pencil, Download } from "lucide-react";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { apiFetch } from "@/utils/api";
 import type { letterBrief } from "@/utils/api";
 
 function Letters() {
     const [headings, setHeadings] = useState<string[]>([]);
     const [letters, setLetters] = useState<letterBrief[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const access_token = localStorage.getItem("access_token");
@@ -16,13 +18,32 @@ function Letters() {
                 Authorization: `Bearer ${access_token}`,
             },
         })
-            .then((res) => (res.ok ? res.json() : Promise.reject("Failed to fetch")))
+            .then((res) => {
+                if (res.ok) {
+                    return res.json()
+                } else {
+                    return Promise.reject("Failed to fetch")
+                }
+            })
             .then((data) => {
                 setHeadings(data.headings || []);
                 setLetters(data.letters || []);
             })
-            .catch((err) => console.error(err));
-    }, []);
+            .catch((err) => console.error(err))
+            .finally(() => {
+                setIsLoading(false);
+            });
+
+    }, [letters]);
+
+    if (isLoading) {
+        return (
+            <div className="flex flex-col gap-7 justify-center items-center h-64">
+                <h1 className="font-bold text-2xl">Just a moment...</h1>
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary" />
+            </div>
+        );
+    }
 
     return (
         <div className="py-5 px-5 sm:px-7 md:px-10">
@@ -54,10 +75,14 @@ function Letters() {
                                 <td className="px-4 py-3">{letter.jobs.company}</td>
                                 <td className="px-4 py-3">{new Date(letter.created_at).toLocaleDateString()}</td>
                                 <td className="px-4 py-3 text-sm flex gap-4">
-                                    <button className="hover:underline hover:text-primary flex gap-2 items-center cursor-pointer">
+                                    <Link className="hover:underline hover:text-primary flex gap-2 items-center cursor-pointer"
+                                         href={{
+                                            pathname: "/letters/" + letter.id,
+                                            // query: { payload: JSON.stringify(letter.id) },
+                                        }}>
                                         <Pencil size={16} />
                                         <span>Edit</span>
-                                    </button>
+                                    </Link>
                                     <button className="hover:underline hover:text-primary flex gap-2 items-center cursor-pointer">
                                         <Download size={16} />
                                         <span>Download</span>

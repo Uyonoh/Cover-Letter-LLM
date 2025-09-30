@@ -31,7 +31,7 @@ function Login() {
             } else {
                 const data = await res.json();
                 localStorage.setItem("access_token", data.access_token);
-                router.push("/letters/generate");
+                router.push("/letters");
             }
 
         } catch (err: unknown) {

@@ -29,6 +29,7 @@ interface loginProps {
 };
 
 interface letterBrief {
+  id: string;
   jobs: Job;
   created_at: string;
 }

@@ -35,7 +35,7 @@ async def register(
             httponly=True,
             secure=False,  # only over HTTPS in production
             samesite="none",
-            expires=60 * 60 * 24  # 1 day
+            max_age=60 * 60 * 24  # 1 day
         )
     except AuthApiError as e:
         if e.message == "User already registered":
@@ -76,7 +76,7 @@ async def login(
         httponly=True,
         secure=False,  # only over HTTPS in production
         samesite="none",
-        expires=60 * 60 * 24  # 1 day
+        max_age=60 * 60 * 24  # 1 day
     )
 
     if ENV == "dev":
