@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/hooks/useAuth";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -20,6 +21,7 @@ import {
 export default function Header() {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [isLoggedIn, setLoggedIn] = useState(false);
+  const { session, signOut } = useAuth();
   const router = useRouter();
   const menuRef = useRef<HTMLElement>(null);
 
@@ -40,13 +42,12 @@ export default function Header() {
 
   // simple auth check; swap with real session logic
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
-    setLoggedIn(!!token);
-  }, []);
+    setLoggedIn(!!session);
+  }, [session]);
 
   function handleLogout() {
-    localStorage.removeItem("access_token");
-    setLoggedIn(false);
+    signOut();
+    // setLoggedIn(false);
     setMenuOpen(false);
     router.push("/");
   }
