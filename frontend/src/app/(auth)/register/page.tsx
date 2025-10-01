@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { apiFetch } from "@/utils/api";
+import { useAuth } from "@/app/hooks/useAuth"
 
 function Register() {
     const [first_name, setFirstName] = useState("");
@@ -14,6 +15,7 @@ function Register() {
     const [password, setPassword] = useState("");
     const [password1, setPassword1] = useState("");
     const [err, setErr] = useState("");
+    const { session, signUp } = useAuth();
     const router = useRouter();
 
     function matchPassword() {
@@ -33,17 +35,11 @@ function Register() {
         }
 
         try {
-            const res = await apiFetch("/auth/register", {
-                method: "POST",
-                body: JSON.stringify({first_name, last_name, email, password}),
-            });
+            const {session, error} = await signUp(email, password);
 
-            if (!res.ok) {
-                const error: apiError = await res.json()
+            if (error) {
                 setErr(error.message);
-            } else {
-                const data = await res.json();
-                localStorage.setItem("access_token", data.access_token);
+            } else if(session) {
                 router.push("/profile");
             }
 

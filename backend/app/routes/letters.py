@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Request, HTTPException
 from app.dependencies import get_current_user
 from app.services.db import get_supabase_client, get_service_client, verify_token, Client, User
 from app.services.gemini import generate_cover_letter, resume
-from app.models.schemas import CoverLetterForm, CoverLetter, datetime, uuid, Any
+from app.models.schemas import CoverLetterForm, CoverLetter, datetime, uuid, Dict, Any
 import os
 
 ENV = os.getenv("ENV", "dev")
@@ -14,7 +14,7 @@ letters_db = {}
 @router.get("")
 async def get_letters(
     request: Request,
-    user: User=Depends(get_current_user),
+    user: Dict[str, Any]=Depends(get_current_user),
     supabase: Client=Depends(get_supabase_client),
     ):
 
@@ -27,7 +27,7 @@ async def get_letters(
     res = (
         supabase.table("cover_letters")
         .select("id, created_at, jobs(title, company)")
-        .eq("user_id", user.id)
+        .eq("user_id", user["sub"])
         .order("created_at", desc=True)
         .execute()
     )
@@ -40,7 +40,7 @@ async def get_letters(
 async def generate(
     request: Request,
     body: CoverLetterForm,
-    user: User = Depends(get_current_user),
+    user: Dict[str, Any]=Depends(get_current_user),
     supabase: Client = Depends(get_supabase_client)
 ) -> dict[str, Any]:
 
@@ -51,7 +51,7 @@ async def generate(
             token = auth.split(" ")[1]
         supabase.postgrest.auth(token)
 
-    user_id: str = user.id
+    user_id: str = user["sub"]
 
     # Generate Cover letter
     content = await generate_cover_letter(
@@ -88,7 +88,7 @@ async def generate(
 async def view(
     request: Request,
     letter_id,
-    user: User=Depends(get_current_user),
+    user: Dict[str, Any]=Depends(get_current_user),
     supabase: Client=Depends(get_supabase_client),
 ):
     
@@ -101,7 +101,7 @@ async def view(
     res = (
         supabase.table("cover_letters")
         .select("id, created_at, content, jobs(title, company)")
-        .eq("user_id", user.id)
+        .eq("user_id", user["sub"])
         .eq("id", letter_id)
         .order("created_at", desc=True)
         .execute()

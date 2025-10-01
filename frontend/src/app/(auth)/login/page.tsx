@@ -1,10 +1,12 @@
 "use client";
 
+import { supabase } from "@/utils/supabaseClient";
 import type { apiError } from "@/utils/api";
 
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/hooks/useAuth";
 import { apiFetch } from "@/utils/api";
 
 
@@ -14,6 +16,7 @@ function Login() {
     const [password, setPassword] = useState("");
     const [isProcessing, setIsProcessing] = useState(false);
     const [err, setErr] = useState("");
+    const {session, signIn, signUp, signOut} = useAuth();
     const router = useRouter();
 
     async function handleLogin(e: React.FormEvent) {
@@ -22,17 +25,16 @@ function Login() {
         setIsProcessing(true);
 
         try {
-            const res = await apiFetch("/auth/login", {
-                method: "POST",
-                body: JSON.stringify({email, password}),
-            });
+            const { session, error } =  await signIn(
+                email,
+                password,
+            )
 
-            if (!res.ok) {
-                const error: apiError = await res.json()
+            if (error) {
                 setErr(error.message);
-            } else {
-                const data = await res.json();
-                localStorage.setItem("access_token", data.access_token);
+            } else if(session) {
+                // const data = await res.json();
+                // localStorage.setItem("access_token", data.access_token);
                 router.push("/letters");
             }
 

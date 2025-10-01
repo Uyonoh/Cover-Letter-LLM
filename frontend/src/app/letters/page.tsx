@@ -16,12 +16,7 @@ function Letters() {
     const [isDialogOpen, setDialogOpen] = useState(false);
 
     useEffect(() => {
-        const access_token = localStorage.getItem("access_token");
-        apiFetch("/letters", {
-            headers: {
-                Authorization: `Bearer ${access_token}`,
-            },
-        })
+        apiFetch("/letters")
             .then((res) => {
                 if (res.ok) {
                     return res.json()

@@ -19,13 +19,7 @@ function View() {
     useEffect(() => {
         setIsLoading(true);
         if (id) {
-            const access_token = localStorage.getItem("access_token");
-            console.log("ID = ", id);
-            apiFetch(`/letters/${id}`, {
-                headers: {
-                    Authorization: `Bearer ${access_token}`,
-                },
-            })
+            apiFetch(`/letters/${id}`)
             .then((res) => {
                 if (res.ok){
                 return res.json();

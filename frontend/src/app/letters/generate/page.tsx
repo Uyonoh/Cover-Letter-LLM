@@ -11,13 +11,9 @@ function Generate() {
     async function handleGenerateLetter(){
         const job_title = jobTitle;
         const job_description = jobDescription;
-        const access_token = localStorage.getItem("access_token");
         const res = await apiFetch("/letters", {
             method: "POST",
             body: JSON.stringify({ job_title, job_description }),
-            headers: {
-                Authorization: `Bearer ${access_token}`,
-            },
         });
 
         if (res.ok){
