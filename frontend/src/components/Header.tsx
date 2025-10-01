@@ -56,7 +56,7 @@ export default function Header() {
     { href: "/", label: "Home", Icon: Home },
     { href: "/about", label: "About", Icon: Info },
     { href: "/login", label: "Login", Icon: LogIn },
-    { href: "/signup", label: "Sign Up", Icon: User },
+    { href: "/register", label: "Sign Up", Icon: User },
   ];
 
   const userLinks = [

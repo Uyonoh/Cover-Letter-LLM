@@ -1,7 +1,11 @@
+"use client";
+
 import "@/styles/index.css";
 import { Clock, FilePenLine, TrendingUp } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 function Home() {
+  const router = useRouter();
   return(
     <div className="py-5 px-5 sm:px-7 md:px-10">
       <div className="hero flex justify-center align-center min-h-[480px] sm:min-h-[560px]
@@ -13,7 +17,8 @@ function Home() {
               saving you time and boosting your chances of landing that interview.
             </p>
             <button className="px-6 py-3 min-w-[84px] max-w-[480px] bg-[#0d7ff2] rounded-xl truncate text-base font-bold
-              cursor-pointer hover:bg-primary/90 transition-all duration-300 transform hover:scale-105">
+              cursor-pointer hover:bg-primary/90 transition-all duration-300 transform hover:scale-105"
+              onClick={(e) => router.push("/letters/generate")}>
               Generate Your First Cover Letter
             </button>
           </div>

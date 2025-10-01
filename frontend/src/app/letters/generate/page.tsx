@@ -1,32 +1,42 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Paperclip } from "lucide-react";
 import { apiFetch } from "@/utils/api";
 
 function Generate() {
     const [jobTitle, setJobTitle] = useState("");
     const [jobDescription, setJobDescription] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const router = useRouter();
 
-    async function handleGenerateLetter(){
-        const job_title = jobTitle;
-        const job_description = jobDescription;
-        const res = await apiFetch("/letters", {
-            method: "POST",
-            body: JSON.stringify({ job_title, job_description }),
-        });
+    async function handleGenerateLetter(e: React.FormEvent){
+        e.preventDefault();
+        setIsLoading(true);
+        try {
 
-        if (res.ok){
-            alert("SUCCESS!!!!!!!!!!!!!!!!1111");
-            console.log(await res.json());
-        } else {
-            alert("Generation Failed");
+            const job_title = jobTitle;
+            const job_description = jobDescription;
+            const res = await apiFetch("/letters", {
+                method: "POST",
+                body: JSON.stringify({ job_title, job_description }),
+            });
+
+            if (res.ok){
+                const data = await res.json()
+                router.push(`/letters/${data.letter_id}`);
+            } else {
+                alert("Generation Failed");
+            }
+        } finally {
+            setIsLoading(false);
         }
     }
 
     return (
         <div className="py-5 px-5 sm:px-7 md:px-10 text-white/80">
-            <form action={handleGenerateLetter} className="sm:grid sm:grid-cols-12">
+            <form action="" onSubmit={handleGenerateLetter} className="sm:grid sm:grid-cols-12">
                 <input type="hidden" name="token" id="token" value="" />
                 <div className="description col-span-9 sm:border-r sm:border-secondary/80 sm:pr-5 sm:min-h-screen">
                     <h2 className="font-bold text-2xl text-white">Generate Your Cover Letter</h2>
@@ -130,6 +140,15 @@ function Generate() {
                 </div>
                 <button type="submit" className="rounded-lg p-2 sm:hidden bg-primary w-full my-7 cursor-pointer">Generate Cover Letter</button>
             </form>
+
+            {isLoading && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+                    <div className="flex flex-col gap-7 justify-center items-center h-64">
+                        <h1 className="font-bold text-2xl">Putting things in place...</h1>
+                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary" />
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
