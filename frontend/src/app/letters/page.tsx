@@ -83,8 +83,8 @@ function Letters() {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-secondary">
-                        {filtered.map((letter, key) => (
-                            <tr key={key} className="hover:bg-background-dark transition">
+                        {filtered.map((letter) => (
+                            <tr key={letter.id} className="hover:bg-background-dark transition">
                                 <td className="px-4 py-3">{letter.jobs.title}</td>
                                 <td className="px-4 py-3">{letter.jobs.company}</td>
                                 <td className="px-4 py-3">{new Date(letter.created_at).toLocaleDateString()}</td>
