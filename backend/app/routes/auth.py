@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Response, Depends
+from fastapi import APIRouter, Response, Depends, HTTPException
 from fastapi.responses import JSONResponse
-from app.models.schemas import User, UserProfile, UserCreateForm, UserLoginForm
+from app.models.schemas import BaseModel, User, UserProfile, UserCreateForm, UserLoginForm
 from app.services.db import get_supabase_client, verify_token, Client
 from supabase_auth.errors import AuthApiError
 import os
@@ -8,24 +8,35 @@ import os
 router = APIRouter(prefix="/auth", tags=["auth"])
 ENV = os.getenv("ENV", "dev")
 
+class TokenPayload(BaseModel):
+    access_token: str
+
 @router.post("")
-async def auth(
-    response: Response,
-    body,
-    supabase: Client = Depends(get_supabase_client),
-):
-    access_token = body.access_token
+async def set_auth_cookie(payload: TokenPayload, response: Response):
+    """
+    Store the Supabase access_token in an HttpOnly cookie.
+    """
+    token = payload.access_token
+    if not token:
+        raise HTTPException(status_code=400, detail="Missing access token")
 
     response.set_cookie(
-            key="sb_access_token",
-            value=access_token,
-            httponly=True,
-            secure=False,  # only over HTTPS in production
-            samesite="none",
-            max_age=60 * 60 * 24  # 1 day
-        )
-    
-    return JSONResponse({"message": "Authorization successful"}, status_code=200)
+        key="sb_access_token",
+        value=token,
+        httponly=True,
+        secure=False,          # True in production (HTTPS)
+        samesite="lax",       # or "strict" depending on your needs
+        max_age=60 * 60 * 24  # 1 day
+    )
+    return {"message": "Auth cookie set"}
+
+@router.delete("")
+async def clear_auth_cookie(response: Response):
+    """
+    Clear the auth cookie (logout).
+    """
+    response.delete_cookie("sb_access_token")
+    return {"message": "Auth cookie cleared"}
 
 @router.post("/register")
 async def register(

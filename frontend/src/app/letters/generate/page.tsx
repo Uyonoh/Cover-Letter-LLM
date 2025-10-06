@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Paperclip } from "lucide-react";
 import { apiFetch } from "@/utils/api";
+import Loading from "@/components/Loading";
 
 function Generate() {
     const [jobTitle, setJobTitle] = useState("");
@@ -141,14 +142,7 @@ function Generate() {
                 <button type="submit" className="rounded-lg p-2 sm:hidden bg-primary w-full my-7 cursor-pointer">Generate Cover Letter</button>
             </form>
 
-            {isLoading && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-                    <div className="flex flex-col gap-7 justify-center items-center h-64">
-                        <h1 className="font-bold text-2xl">Putting things in place...</h1>
-                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary" />
-                    </div>
-                </div>
-            )}
+            <Loading isLoading={isLoading} messages={["Putting things in place..."]} overlay />
         </div>
     );
 }

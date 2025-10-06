@@ -1,11 +1,12 @@
 "use client";
 
-import { Search, Pencil, Download, Trash2 } from "lucide-react";
+import { Search, Pencil, Download } from "lucide-react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { apiFetch } from "@/utils/api";
-import type { letterBrief } from "@/utils/api";
-import { DeleteConfirmationDialog } from "@/components/DeleteConfirmationDialog";
+import type { letterBrief } from "@/types/letters";
+import DeleteButton from "@/components/DeleteButton";
+import Loading from "@/components/Loading";
 
 
 function Letters() {
@@ -13,43 +14,32 @@ function Letters() {
     const [letters, setLetters] = useState<letterBrief[]>([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [isLoading, setIsLoading] = useState(true);
-    const [isDialogOpen, setDialogOpen] = useState(false);
 
     useEffect(() => {
-        apiFetch("/letters")
-            .then((res) => {
-                if (res.ok) {
-                    return res.json()
-                } else {
-                    return Promise.reject("Failed to fetch")
-                }
-            })
-            .then((data) => {
-                setHeadings(data.headings || []);
-                setLetters(data.letters || []);
-            })
-            .catch((err) => console.error(err))
-            .finally(() => {
-                setIsLoading(false);
-            });
-
+        const loadLetters = async () => {
+            try {
+                const res = await apiFetch("/letters")
+                if (!res.ok) throw new Error(await res.text())
+                const data = await res.json()
+                setHeadings(data.headings || [])
+                setLetters(data.letters || [])
+            } catch (err) {
+                console.error("Fetch error:", err)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+        loadLetters()
     }, []);
 
-    function handleDelete ():void {
-        console.log("Deleted");
-    }
-
     // filtered list (wire in debounce as you like)
-  const filtered = letters.filter((l) =>
-    l.jobs.title?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+    const filtered = letters.filter((l) =>
+        l.jobs?.title?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     if (isLoading) {
         return (
-            <div className="flex flex-col gap-7 justify-center items-center h-64">
-                <h1 className="font-bold text-2xl">Just a moment...</h1>
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary" />
-            </div>
+            <Loading isLoading={isLoading} messages={["Just a moment..."]} />
         );
     }
 
@@ -85,7 +75,7 @@ function Letters() {
                                 <td className="px-4 py-3">{new Date(letter.created_at).toLocaleDateString()}</td>
                                 <td className="px-4 py-3 text-sm flex gap-4">
                                     <Link className="hover:underline hover:text-primary flex gap-2 items-center cursor-pointer"
-                                         href={{
+                                        href={{
                                             pathname: "/letters/" + letter.id,
                                             // query: { payload: JSON.stringify(letter.id) },
                                         }}>
@@ -93,28 +83,18 @@ function Letters() {
                                         <span className="hidden sm:block">Edit</span>
                                     </Link>
                                     <Link href="#"
-                                         className="hover:underline hover:text-primary flex gap-2 items-center cursor-pointer">
+                                        className="hover:underline hover:text-primary flex gap-2 items-center cursor-pointer">
                                         <Download size={20} />
                                         <span className="hidden sm:block">Download</span>
                                     </Link>
-                                    <span className="hover:underline hover:text-primary flex gap-2 items-center cursor-pointer"
-                                        onClick={() => setDialogOpen(true)}>
-                                        <Trash2 size={20} className="text-red-500" />
-                                        <span className="hidden sm:block">Delete</span>
-                                    </span>
+                                    <DeleteButton id={letter.id} table="cover_letters" text="Delete" 
+                                     onDeleted={() => setLetters(prev => prev.filter(l => l.id !== letter.id))} />
                                 </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
-
-         {/* Delete dialogue */}
-            <DeleteConfirmationDialog
-                isOpen={isDialogOpen}
-                onCancel={() => setDialogOpen(false)}
-                onConfirm={handleDelete}
-            />
 
         </div>
     );

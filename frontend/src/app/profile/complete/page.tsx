@@ -8,7 +8,7 @@ export default function CompleteProfile() {
   const router = useRouter()
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     const loadUser = async () => {
@@ -27,7 +27,7 @@ export default function CompleteProfile() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
+    setIsLoading(true)
 
     const { data: { session } } = await supabase.auth.getSession()
     if (!session) return router.push('/login')
@@ -41,7 +41,7 @@ export default function CompleteProfile() {
       })
       .eq('id', session.user.id)
 
-    setLoading(false)
+    setIsLoading(false)
 
     if (error) {
       console.error(error)
@@ -86,10 +86,10 @@ export default function CompleteProfile() {
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={isLoading}
           className="bg-primary text-foreground font-semibold rounded-lg py-2 hover:bg-primary/90 transition-colors"
         >
-          {loading ? 'Saving...' : 'Save & Continue'}
+          {isLoading ? 'Saving...' : 'Save & Continue'}
         </button>
       </form>
     </div>

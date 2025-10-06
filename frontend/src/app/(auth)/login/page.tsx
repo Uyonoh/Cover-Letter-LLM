@@ -1,20 +1,17 @@
 "use client";
 
-import { supabase } from "@/utils/supabaseClient";
-import type { apiError } from "@/utils/api";
-
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/hooks/useAuth";
-import { apiFetch } from "@/utils/api";
+import Loading from "@/components/Loading";
 
 
 
 function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [isProcessing, setIsProcessing] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [err, setErr] = useState("");
     const {session, signIn, signUp, signOut} = useAuth();
     const router = useRouter();
@@ -22,7 +19,7 @@ function Login() {
     async function handleLogin(e: React.FormEvent) {
         e.preventDefault();
         setErr("");
-        setIsProcessing(true);
+        setIsLoading(true);
 
         try {
             const { session, error } =  await signIn(
@@ -42,7 +39,7 @@ function Login() {
             setErr("Network error, try again later");
             console.log("ERR: ", err);
         } finally {
-            setIsProcessing(false);
+            setIsLoading(false);
         }
     }
 
@@ -78,14 +75,7 @@ function Login() {
                 >Sign In</button>
             </div>
 
-            {isProcessing && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-                    <div className="flex flex-col gap-7 justify-center items-center h-64">
-                        <h1 className="font-bold text-2xl">Verifying your identity...</h1>
-                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary" />
-                    </div>
-                </div>
-            )}
+            <Loading isLoading={isLoading} messages={["Verifying Your Identity..."]} overlay />
         </form>
     );
 }

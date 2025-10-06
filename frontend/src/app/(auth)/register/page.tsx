@@ -1,11 +1,10 @@
 "use client";
 
-import type { apiError } from "@/utils/api";
-
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { apiFetch } from "@/utils/api";
+import Loading from "@/components/Loading";
 import { useAuth } from "@/app/hooks/useAuth"
 
 function Register() {
@@ -91,14 +90,7 @@ function Register() {
                 >Register</button>
             </div>
 
-            {isLoading && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-                    <div className="flex flex-col gap-7 justify-center items-center h-64">
-                        <h1 className="font-bold text-2xl">Verifying your identity...</h1>
-                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary" />
-                    </div>
-                </div>
-            )}
+            <Loading isLoading={isLoading} messages={["Creating Your Account..."]} overlay />
 
         </form>
     );

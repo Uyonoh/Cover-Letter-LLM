@@ -4,41 +4,46 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/utils/api";
 import { supabase } from '@/utils/supabaseClient'
-import { log } from "console";
+import Loading from "@/components/Loading";
 
 
 function Profile() {
-    const [firstName, setFirstName] = useState('')
-    const [lastName, setLastName] = useState('')
-    const [email, setEmail] = useState('')
-    const [loading, setLoading] = useState(false)
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [email, setEmail] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
-        const populateProfile = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
-                return router.push("/login");
+        setIsLoading(true);
+        try {
+            const populateProfile = async () => {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
+                    return router.push("/login");
+                }
+
+                const { data: profile, error  } = await supabase
+                    .from('profiles')
+                    .select('first_name, last_name')
+                    .eq('id', session.user.id)
+                    .maybeSingle()
+                
+                if (error) {
+                    console.error('Error fetching profile:', error.message)
+                    // return router.replace('/error')
+                }
+                
+                setFirstName(profile?.first_name);
+                setLastName(profile?.last_name);
+                setEmail(session.user.email || "");
+
             }
 
-            const { data: profile, error  } = await supabase
-                .from('profiles')
-                .select('first_name, last_name')
-                .eq('id', session.user.id)
-                .maybeSingle()
-            
-            if (error) {
-                console.error('Error fetching profile:', error.message)
-                // return router.replace('/error')
-            }
-            
-            setFirstName(profile?.first_name);
-            setLastName(profile?.last_name);
-            setEmail(session.user.email || "");
-
+            populateProfile();
+        } finally {
+            setIsLoading(false);
         }
-
-        populateProfile();
     }, [router]);
 
     return (
@@ -146,6 +151,8 @@ function Profile() {
                     <button className="bg-red-500/80 text-white rounded-lg w-33 h-10 cursor-pointer">Delete Account</button>
                 </div>
             </section>
+
+            <Loading isLoading={isLoading} messages={["Fetching Your Details..."]} overlay />
         </div>
     );
 }

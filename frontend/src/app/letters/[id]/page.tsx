@@ -1,19 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
-import { Trash2 } from "lucide-react";
+import React, { useState, useEffect } from "react";
+// import { usePathname } from "next/navigation";
+import { useParams } from "next/navigation";
+import { Delete, Trash2 } from "lucide-react";
 import { apiFetch } from "@/utils/api";
-import { DeleteConfirmationDialog } from "@/components/DeleteConfirmationDialog";
+import Loading from "@/components/Loading";
+import DeleteButton from "@/components/DeleteButton";
 
 
 function View() {
-    const pathname = usePathname();
+    // const pathname = usePathname();
     const [jobTitle, setJobTitle] = useState("");
     const [letter, setLetter] = useState("");
-    const id = pathname.split("/").pop();
+    // const id = pathname.split("/").pop();
+    const { id } = useParams<{ id: string }>();
     const [isLoading, setIsLoading] = useState(true);
-    const [isDialogOpen, setDialogOpen] = useState(false);
 
 
     useEffect(() => {
@@ -38,25 +40,29 @@ function View() {
 
         
 
-    }, [id]);
+    }, []);
 
-    function handleDelete ():void {
-        console.log("Deleted");
+    function handleSubmit(e: React.FormEvent) {
+        e.preventDefault();
     }
-
 
     if (isLoading) {
         return (
-            <div className="flex flex-col gap-7 justify-center items-center h-64">
-                <h1 className="font-bold text-2xl">Retrieving your letter...</h1>
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary" />
-            </div>
+            <Loading isLoading={isLoading} messages={["Retrieving your letter..."]} />
         );
+    }
+
+    if (!id) {
+        return (
+            <div>
+                <p>Letter not found!!!</p>
+            </div>
+        )
     }
 
     return (
         <div className="relative py-5 px-5 sm:px-7 md:px-10 text-white/80">
-            <form action="" className="sm:grid sm:grid-cols-12">
+            <form className="sm:grid sm:grid-cols-12" onSubmit={handleSubmit}>
                 <input type="hidden" name="token" id="token" value="" />
                 <div className="description col-span-9 sm:border-r sm:border-secondary/80 sm:pr-5 sm:min-h-screen">
                     <h2 className="font-bold text-2xl text-white">Your Cover Letter</h2>
@@ -71,9 +77,7 @@ function View() {
                                 className="sm:w-full bg-secondary/10 text-white border border-secondary rounded-lg py-2 px-4 max-w-[500px]
                                             focus:border-primary focus:ring-0 focus:outline-none text-lg"
                                 onChange={(e) => setJobTitle(e.target.value)}/>
-                            <Trash2 size={20}
-                            className="text-red-700 hover:text-red-500 cursor-pointer"
-                            onClick={() => setDialogOpen(true)}/>
+                            <DeleteButton id={id} table="cover_letters" text="" />
                         </div>
                         <textarea name="job-description" id="job-description"
                             value={letter}
@@ -168,12 +172,6 @@ function View() {
                 <button type="submit" className="rounded-lg p-2 sm:hidden bg-primary w-full my-7 cursor-pointer">Generate Cover Letter</button>
             </form>
 
-            {/* Delete dialogue */}
-            <DeleteConfirmationDialog
-                isOpen={isDialogOpen}
-                onCancel={() => setDialogOpen(false)}
-                onConfirm={handleDelete}
-            />
         </div>
     );
 }
