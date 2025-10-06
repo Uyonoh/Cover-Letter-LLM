@@ -20,6 +20,18 @@ function AuthLayout(
         }
     }
 
+    function SignInWIthGithub() {
+        const error = signInWithProvider(
+            "github",
+            {
+                redirectTo: "http://localhost:3000/auth/callback",
+            });
+
+        if (!error) {
+            router.push("/letters");
+        }
+    }
+
     return (
         <div className="flex justify-center items-center w-full h-[90vh]">
             <div className="flex flex-col justify-between items-center gap-5">
@@ -41,11 +53,12 @@ function AuthLayout(
                     </button>
                     <button
                         className=" flex justify-center items-center gap-1 rounded-lg text-white p-2 w-full cursor-pointer bg-[#0d151c] border border-secondary"
+                        onClick={(e) => SignInWIthGithub()}
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="30" height="30" viewBox="0 0 48 48" className="text-black">
-                            <path fill="#0E557C" d="M42,37c0,2.762-2.238,5-5,5H11c-2.761,0-5-2.238-5-5V11c0-2.762,2.239-5,5-5h26c2.762,0,5,2.238,5,5V37z"></path><path fill="#FFF" d="M12 19H17V36H12zM14.485 17h-.028C12.965 17 12 15.888 12 14.499 12 13.08 12.995 12 14.514 12c1.521 0 2.458 1.08 2.486 2.499C17 15.887 16.035 17 14.485 17zM36 36h-5v-9.099c0-2.198-1.225-3.698-3.192-3.698-1.501 0-2.313 1.012-2.707 1.99C24.957 25.543 25 26.511 25 27v9h-5V19h5v2.616C25.721 20.5 26.85 19 29.738 19c3.578 0 6.261 2.25 6.261 7.274L36 36 36 36z"></path>
+                        <svg role="img" viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-label="GitHub"><title>GitHub</title> <path   fill="#ffffff"   d="M12 .296c-6.63 0-12 5.373-12 12 0 5.303   3.438 9.8 8.205 11.387.6.113.82-.261.82-.58   0-.287-.01-1.05-.016-2.061-3.338.726-4.042-1.61-4.042-1.61   -.546-1.387-1.334-1.757-1.334-1.757-1.089-.745.083-.73.083-.73   1.205.085 1.84 1.237 1.84 1.237 1.07 1.834 2.806 1.304 3.492   .997.108-.775.418-1.304.761-1.604-2.665-.303-5.466-1.334-5.466   -5.931 0-1.31.469-2.381 1.235-3.221-.124-.303-.535-1.523.117   -3.176 0 0 1.008-.322 3.301 1.23a11.5 11.5 0 0 1 3.003-.404   c1.018.005 2.043.138 3.003.404 2.291-1.552 3.297-1.23 3.297-1.23   .655 1.653.244 2.873.12 3.176.77.84 1.233 1.911 1.233 3.221   0 4.609-2.807 5.624-5.479 5.921.43.371.815 1.102.815 2.222   0 1.604-.015 2.896-.015 3.293 0 .322.216.699.825.58C20.565   22.092 24 17.596 24 12.296c0-6.627-5.373-12-12-12Z" />
                         </svg>
-                        <span>LinkedIn</span>
+
+                        <span>Github</span>
                     </button>
                 </div>
             </div>

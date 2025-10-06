@@ -98,20 +98,20 @@ function View() {
                     {/* Letter Style */}
                     <div className="flex flex-col gap-3">
                         <p>Cover Letter Style</p>
-                        <div className="grid grid-cols-3 sm:grid-cols-2 gap-3">
-                            <label className="flex-1">
+                        <div className="flex flex-wrap gap-3">
+                            <label className="flex-1 min-w-[100px]">
                                 <input  className="sr-only peer" name="cover-letter-style" type="radio" value="professional"/>
                                 <div className="cursor-pointer text-center text-sm font-medium py-2 px-3 rounded-lg border border-secondary dark:border-gray-700 peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary transition-colors">
                                     Professional
                                 </div>
                             </label>
-                            <label className="flex-1">
+                            <label className="flex-1 min-w-[100px]">
                                 <input  className="sr-only peer" name="cover-letter-style" type="radio" value="casual"/>
                                 <div className="cursor-pointer text-center text-sm font-medium py-2 px-3 rounded-lg border border-secondary dark:border-gray-700 peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary transition-colors">
                                     Casual
                                 </div>
                             </label>
-                            <label className="flex-1 sm:col-span-2 ">
+                            <label className="flex-1 w-full min-w-[100px] ">
                                 <input  className="sr-only peer" name="cover-letter-style" type="radio" value="creative"/>
                                 <div className="cursor-pointer text-center text-sm font-medium py-2 px-3 rounded-lg border border-secondary dark:border-gray-700 peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary transition-colors">
                                     Creative
@@ -123,20 +123,20 @@ function View() {
                     {/* Length */}
                     <div className="flex flex-col gap-3">
                         <p>Length</p>
-                        <div className="grid grid-cols-3 sm:grid-cols-3 gap-3">
-                            <label className="flex-1">
+                        <div className="flex flex-wrap gap-3">
+                            <label className="flex-1 min-w-[80px]">
                                 <input  className="sr-only peer" name="cover-letter-length" type="radio" value="concise"/>
                                 <div className="cursor-pointer text-center text-sm font-medium py-2 px-3 rounded-lg border border-secondary dark:border-gray-700 peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary transition-colors">
                                     Concise
                                 </div>
                             </label>
-                            <label className="flex-1">
+                            <label className="flex-1 min-w-[80px]">
                                 <input  className="sr-only peer" name="cover-letter-length" type="radio" value="standard"/>
                                 <div className="cursor-pointer text-center text-sm font-medium py-2 px-3 rounded-lg border border-secondary dark:border-gray-700 peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary transition-colors">
                                     Standard
                                 </div>
                             </label>
-                            <label className="flex-1">
+                            <label className="flex-1 min-w-[80px]">
                                 <input  className="sr-only peer" name="cover-letter-length" type="radio" value="detailed"/>
                                 <div className="cursor-pointer text-center text-sm font-medium py-2 px-3 rounded-lg border border-secondary dark:border-gray-700 peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary transition-colors">
                                     Detailed

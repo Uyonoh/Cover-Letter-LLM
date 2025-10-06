@@ -1,10 +1,46 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { apiFetch } from "@/utils/api";
+import { supabase } from '@/utils/supabaseClient'
+import { log } from "console";
 
 
 function Profile() {
+    const [firstName, setFirstName] = useState('')
+    const [lastName, setLastName] = useState('')
+    const [email, setEmail] = useState('')
+    const [loading, setLoading] = useState(false)
+    const router = useRouter();
+
+    useEffect(() => {
+        const populateProfile = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                return router.push("/login");
+            }
+
+            const { data: profile, error  } = await supabase
+                .from('profiles')
+                .select('first_name, last_name')
+                .eq('id', session.user.id)
+                .maybeSingle()
+            
+            if (error) {
+                console.error('Error fetching profile:', error.message)
+                // return router.replace('/error')
+            }
+            
+            setFirstName(profile?.first_name);
+            setLastName(profile?.last_name);
+            setEmail(session.user.email || "");
+
+        }
+
+        populateProfile();
+    }, [router]);
+
     return (
         <div className="flex flex-col w-full py-5 px-5 sm:px-7 md:px-10">
             <h1 className="font-bold text-4xl leading-tighter">Profile & Settings</h1>
@@ -15,13 +51,27 @@ function Profile() {
 
                 <div className="sm:grid grid-cols-2 gap-5 py-2 text-secondary">
                     <div className="flex flex-col gap-2">
-                        <label htmlFor="name">Name</label>
-                        <input type="text" name="name" className="form-input" placeholder="Your Name"/>
+                        <label htmlFor="first-name">First Name</label>
+                        <input type="text" name="first-name" className="form-input" placeholder="First Name"
+                            value={firstName}
+                            onChange={(e) => setFirstName(e.target.value)}
+                            />
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                        <label htmlFor="last-name">Last Name</label>
+                        <input type="text" name="last-name" className="form-input" placeholder="Last Name"
+                            value={lastName}
+                            onChange={(e) => setLastName(e.target.value)}
+                            />
                     </div>
 
                     <div className="flex flex-col gap-2">
                         <label htmlFor="email">Email</label>
-                        <input type="email" name="email" className="form-input" placeholder="you@example.com"/>
+                        <input type="email" name="email" className="form-input" placeholder="you@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        />
                     </div>
 
                     <div className="flex flex-col gap-2">

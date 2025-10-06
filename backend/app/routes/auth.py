@@ -8,6 +8,25 @@ import os
 router = APIRouter(prefix="/auth", tags=["auth"])
 ENV = os.getenv("ENV", "dev")
 
+@router.post("")
+async def auth(
+    response: Response,
+    body,
+    supabase: Client = Depends(get_supabase_client),
+):
+    access_token = body.access_token
+
+    response.set_cookie(
+            key="sb_access_token",
+            value=access_token,
+            httponly=True,
+            secure=False,  # only over HTTPS in production
+            samesite="none",
+            max_age=60 * 60 * 24  # 1 day
+        )
+    
+    return JSONResponse({"message": "Authorization successful"}, status_code=200)
+
 @router.post("/register")
 async def register(
     body: UserCreateForm,

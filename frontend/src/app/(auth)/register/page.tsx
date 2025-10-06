@@ -9,11 +9,11 @@ import { apiFetch } from "@/utils/api";
 import { useAuth } from "@/app/hooks/useAuth"
 
 function Register() {
-    const [first_name, setFirstName] = useState("");
-    const [last_name, setLastName] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [password1, setPassword1] = useState("");
+    const [consent, setConsent] = useState(false);
     const [err, setErr] = useState("");
     const { session, signUp } = useAuth();
     const router = useRouter();
@@ -30,9 +30,16 @@ function Register() {
         setErr("");
 
         if (!matchPassword()) {
-            setErr("Passwords must match! Please comfirm your password");
+            setErr("Passwords must match! Please comfirm your password.");
             return;
         }
+
+        if (!consent) {
+            setErr ("Please accept the terms and conditions to proceed!");
+            return;
+        }
+
+        setIsLoading(true);
 
         try {
             const {session, error} = await signUp(email, password);
@@ -40,12 +47,14 @@ function Register() {
             if (error) {
                 setErr(error.message);
             } else if(session) {
-                router.push("/profile");
+                router.push("/profile/complete");
             }
 
         } catch (err: unknown) {
             setErr("Network error, try again later");
             console.log("ERR: ", err);
+        } finally {
+            setIsLoading(false);
         }
     }
 
@@ -62,15 +71,16 @@ function Register() {
 
             <div className="flex flex-col gap-4 text-secondary w-full sm:w-[500px]">
                 <div className="flex flex-col gap-4">
-                    <input onChange={(e) => setFirstName(e.target.value)} type="text" name="first-name" id="first-name" placeholder="First Name" className="w-full p-2 form-input"/>
-                    <input onChange={(e) => setLastName(e.target.value)}  type="text" name="last-name" id="last-name" placeholder="Last Name"    className="w-full p-2 form-input"/>
-                    <input onChange={(e) => setEmail(e.target.value)}     type="email" name="email" id="email" placeholder="Email"               className="w-full p-2 form-input"/>
-                    <input onChange={(e) => setPassword(e.target.value)}  type="password" name="password" id="password" placeholder="Password"   className="w-full p-2 form-input"/>
-                    <input onChange={(e) => setPassword1(e.target.value)} type="password" name="password1" id="password1" placeholder="Confirm Password"   className="w-full p-2 form-input"/>
+                    {/* <input onChange={(e) => setFirstName(e.target.value)} type="text" name="first-name" id="first-name" placeholder="First Name" className="w-full p-2 form-input"/>
+                    <input onChange={(e) => setLastName(e.target.value)}  type="text" name="last-name" id="last-name" placeholder="Last Name"    className="w-full p-2 form-input"/> */}
+                    <input onChange={(e) => setEmail(e.target.value)}     type="email" name="email" id="email" placeholder="Email"               className="w-full p-2 form-input" required/>
+                    <input onChange={(e) => setPassword(e.target.value)}  type="password" name="password" id="password" placeholder="Password"   className="w-full p-2 form-input" required/>
+                    <input onChange={(e) => setPassword1(e.target.value)} type="password" name="password1" id="password1" placeholder="Confirm Password"   className="w-full p-2 form-input" required/>
                 </div>
                 <div className="remember-forgot flex justify-between">
                     <div className="flex gap-2">
-                        <input type="checkbox" name="remember" id="remember" />
+                        <input type="checkbox" name="remember" id="remember" 
+                        onClick={(e) => setConsent(!consent)}/>
                         <label htmlFor="remember">I have read and ...</label>
                     </div>
                     {/* <Link href="/forgot-password" className="text-blue-600">Forgot your password?</Link> */}
@@ -81,7 +91,14 @@ function Register() {
                 >Register</button>
             </div>
 
-            
+            {isLoading && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+                    <div className="flex flex-col gap-7 justify-center items-center h-64">
+                        <h1 className="font-bold text-2xl">Verifying your identity...</h1>
+                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary" />
+                    </div>
+                </div>
+            )}
 
         </form>
     );

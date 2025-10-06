@@ -4,6 +4,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/utils/supabaseClient';
+import { apiFetch } from '@/utils/api';
 
 export default function AuthCallback() {
   const router = useRouter();
@@ -12,12 +13,30 @@ export default function AuthCallback() {
     const syncSession = async () => {
       const { data: { session } } = await supabase.auth.getSession()
       if (session?.access_token) {
-        // await fetch('/api/auth', {
-        //   method: 'POST',
-        //   headers: { 'Content-Type': 'application/json' },
-        //   body: JSON.stringify({ access_token: session.access_token }),
-        // })
-        router.push('/letters');
+        await apiFetch('/auth', {
+          method: 'POST',
+          body: JSON.stringify({ access_token: session.access_token }),
+        })
+        
+        // Check profile
+        const { data: profile, error  } = await supabase
+          .from('profiles')
+          .select('first_name, last_name')
+          .eq('id', session.user.id)
+          .maybeSingle()
+          
+        
+        if (error) {
+          console.error('Error fetching profile:', error.message)
+          // return router.replace('/error')
+        }
+
+        if (!profile?.first_name || !profile?.last_name) {
+          router.replace('/profile/complete')
+        } else {
+          router.push('/letters')
+        }
+
       } else {
         router.push('/login');
       }

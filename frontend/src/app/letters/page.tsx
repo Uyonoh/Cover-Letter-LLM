@@ -89,18 +89,18 @@ function Letters() {
                                             pathname: "/letters/" + letter.id,
                                             // query: { payload: JSON.stringify(letter.id) },
                                         }}>
-                                        <Pencil size={16} />
-                                        <span>Edit</span>
+                                        <Pencil size={20} />
+                                        <span className="hidden sm:block">Edit</span>
                                     </Link>
                                     <Link href="#"
-                                    className="hover:underline hover:text-primary flex gap-2 items-center cursor-pointer">
-                                        <Download size={16} />
-                                        <span>Download</span>
+                                         className="hover:underline hover:text-primary flex gap-2 items-center cursor-pointer">
+                                        <Download size={20} />
+                                        <span className="hidden sm:block">Download</span>
                                     </Link>
                                     <span className="hover:underline hover:text-primary flex gap-2 items-center cursor-pointer"
                                         onClick={() => setDialogOpen(true)}>
-                                        <Trash2 size={16} className="text-red-500" />
-                                        <span>Delete</span>
+                                        <Trash2 size={20} className="text-red-500" />
+                                        <span className="hidden sm:block">Delete</span>
                                     </span>
                                 </td>
                             </tr>
