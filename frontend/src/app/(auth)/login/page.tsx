@@ -30,14 +30,12 @@ function Login() {
             if (error) {
                 setErr(error.message);
             } else if(session) {
-                // const data = await res.json();
-                // localStorage.setItem("access_token", data.access_token);
                 router.push("/letters");
             }
 
         } catch (err: unknown) {
             setErr("Network error, try again later");
-            console.log("ERR: ", err);
+            console.error(err);
         } finally {
             setIsLoading(false);
         }
