@@ -40,12 +40,14 @@ export function DeleteConfirmationDialog({
 
         <div className="mt-6 flex justify-end space-x-3">
           <button
+            type="button"
             onClick={onCancel}
             className="px-4 py-2 bg-secondary text-white rounded-md hover:bg-secondary/90 transition"
           >
             Cancel
           </button>
           <button
+            type="button"
             onClick={onConfirm}
             className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
           >

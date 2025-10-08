@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Request, HTTPException
 from app.dependencies import get_current_user
 from app.services.db import get_supabase_client, get_service_client, verify_token, Client, User
 from app.services.gemini import generate_cover_letter, resume
-from app.models.schemas import CoverLetterForm, CoverLetter, datetime, uuid, Dict, Any
+from app.models.schemas.cover_letters import GenerateLetterRequest, CoverLetter, datetime, uuid, Dict, Any
 import os
 
 ENV = os.getenv("ENV", "dev")
@@ -26,7 +26,7 @@ async def get_letters(
 
     res = (
         supabase.table("cover_letters")
-        .select("id, created_at, jobs(title, company)")
+        .select("id, content, created_at, jobs(title, company)")
         .eq("user_id", user["sub"])
         .order("created_at", desc=True)
         .execute()
@@ -39,7 +39,7 @@ async def get_letters(
 @router.post("")
 async def generate(
     request: Request,
-    body: CoverLetterForm,
+    body: GenerateLetterRequest,
     user: Dict[str, Any]=Depends(get_current_user),
     supabase: Client = Depends(get_supabase_client)
 ) -> dict[str, Any]:

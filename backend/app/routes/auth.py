@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Response, Depends, HTTPException
 from fastapi.responses import JSONResponse
-from app.models.schemas import BaseModel, User, UserProfile, UserCreateForm, UserLoginForm
+from app.models.schemas.auth import BaseModel, User, UserProfile, UserCreateForm, UserLoginForm
 from app.services.db import get_supabase_client, verify_token, Client
 from supabase_auth.errors import AuthApiError
 import os

@@ -9,12 +9,6 @@ import DeleteButton from "@/components/DeleteButton";
 import Loading from "@/components/Loading";
 
 function Letters() {
-  const [headings, setHeadings] = useState<string[]>([
-    "Job Title",
-    "Company",
-    "Created",
-    "Actions",
-  ]);
   const [letters, setLetters] = useState<letterBrief[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -22,6 +16,12 @@ function Letters() {
   // pagination
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10; // number of rows per page
+  const headings = [
+    "Job Title",
+    "Company",
+    "Created",
+    "Actions",
+  ];
 
   useEffect(() => {
     const loadLetters = async () => {
@@ -29,7 +29,6 @@ function Letters() {
         const res = await apiFetch("/letters");
         if (!res.ok) throw new Error(await res.text());
         const data = await res.json();
-        setHeadings(data.headings || headings);
         setLetters(data.letters || []);
       } catch (err: unknown) {
         console.error("Fetch error:", err);
@@ -39,7 +38,7 @@ function Letters() {
       }
     };
     loadLetters();
-  }, []);
+  });
 
   // Filter by job title or company
   const filtered = letters.filter((l) =>

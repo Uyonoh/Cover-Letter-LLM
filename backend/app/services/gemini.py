@@ -72,6 +72,7 @@ async def generate_cover_letter(model:str,job_title:str, job_description:str, re
     - Mention 1–2 specific qualifications from resume that align with the job
     - Include the company or role name
     - End with a brief call to action
+    - Use a plain text format
 
     Respond with ONLY the cover letter text.
 
