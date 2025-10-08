@@ -211,7 +211,7 @@ function View() {
               <div className="flex gap-3 justify-end">
                 <button
                   type="button"
-                  className="rounded-lg px-4 py-2 border border-primary text-white hover:bg-background-light cursor-pointer"
+                  className="rounded-lg px-4 py-2 border border-secondary cursor-pointer hover:bg-gray-700"
                   onClick={handleRegenerate}
                 >
                   Regenerate

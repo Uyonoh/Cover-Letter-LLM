@@ -6,10 +6,17 @@ interface LoadingProps {
   isLoading: boolean;
   messages?: string[];
   overlay?: boolean;
-  finalMessage?: string; // optional default message at the end
+  finalMessage?: string;
+  delay?: number;
 }
 
-function Loading({ isLoading, messages = [], overlay, finalMessage = "Almost done..." }: LoadingProps) {
+function Loading({
+  isLoading,
+  messages = [],
+  overlay,
+  finalMessage = "Almost done...",
+  delay=2500 // In ms
+}: LoadingProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [doneCycling, setDoneCycling] = useState(false);
 
@@ -29,10 +36,10 @@ function Loading({ isLoading, messages = [], overlay, finalMessage = "Almost don
           return prev;
         }
       });
-    }, 2500); // change every 2.5s
+    }, delay); // change every 2.5s
 
     return () => clearInterval(interval);
-  }, [isLoading, messages]);
+  }, [isLoading, messages, delay]);
 
   const classes = overlay
     ? "fixed inset-0 z-50 flex items-center justify-center bg-black/70"

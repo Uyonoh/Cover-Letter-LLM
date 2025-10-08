@@ -285,6 +285,7 @@ function Generate() {
                     "Finalizing Details",
                 ]}
                 overlay
+                delay={3500}
             />
         </div>
     );
