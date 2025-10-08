@@ -13,6 +13,7 @@ interface CoverLetter {
 interface letterBrief {
   id: string;
   jobs: Job;
+  content: string;
   created_at: string;
 }
 
