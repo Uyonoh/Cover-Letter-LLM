@@ -73,7 +73,11 @@ function Login() {
                 >Sign In</button>
             </div>
 
-            <Loading isLoading={isLoading} messages={["Verifying Your Identity..."]} overlay />
+            <Loading isLoading={isLoading} messages={[
+                "Signing you in",
+                "Verifying Your Identity",
+                "Syncing your data",
+                ]} overlay />
         </form>
     );
 }

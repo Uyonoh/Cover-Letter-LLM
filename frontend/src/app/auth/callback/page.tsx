@@ -47,6 +47,10 @@ export default function AuthCallback() {
   });
 
   return (
-    <Loading isLoading messages={["Loading your portal..."]} overlay />
+    <Loading isLoading messages={[
+      "Fetching your session",
+      "Syncing your data",
+      "Just a moment",
+    ]} overlay />
   )
 }

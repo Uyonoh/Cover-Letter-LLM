@@ -29,8 +29,5 @@ class ListLetterResponse(BaseModel):
   content: str
   created_at: datetime
 
-class ViewLetterResponse(BaseModel):
-  id: str
+class ViewLetterResponse(CoverLetter):
   jobs: Job
-  content: str
-  created_at: datetime

@@ -94,7 +94,11 @@ function Register() {
                 >Register</button>
             </div>
 
-            <Loading isLoading={isLoading} messages={["Creating Your Account..."]} overlay />
+            <Loading isLoading={isLoading} messages={[
+                "Verifying Your Information",
+                "Creating your account",
+                "Setting up your profile",
+                ]} overlay />
 
         </form>
     );

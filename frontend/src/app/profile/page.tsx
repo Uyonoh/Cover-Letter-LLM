@@ -241,7 +241,11 @@ function Profile() {
 
       <Loading
         isLoading={isLoading}
-        messages={["Fetching Your Details..."]}
+        messages={[
+          "Fetching Profile Data",
+          "Validating Information",
+          "Just a moment",
+        ]}
         overlay
       />
     </div>

@@ -75,7 +75,11 @@ function Letters() {
   }
 
   if (isLoading) {
-    return <Loading isLoading={isLoading} messages={["Just a moment..."]} />;
+    return <Loading isLoading={isLoading} messages={[
+      "Loading your letters",
+      "Populating tables",
+      "Just a moment",
+    ]} />;
   }
 
   if (error) {

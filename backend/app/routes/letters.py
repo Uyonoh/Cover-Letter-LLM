@@ -77,6 +77,9 @@ async def generate(
         "job_id": job_id,
         "content": content,
         "version": 1,
+        "style": body.style,
+        "length": body.length,
+        "modifiers": body.modifiers,
     }
 
     res = supabase.table("cover_letters").insert(data).execute()
@@ -100,7 +103,7 @@ async def view(
 
     res = (
         supabase.table("cover_letters")
-        .select("id, created_at, content, jobs(title, company)")
+        .select("*, jobs(*)")
         .eq("user_id", user["sub"])
         .eq("id", letter_id)
         .order("created_at", desc=True)

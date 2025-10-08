@@ -279,7 +279,11 @@ function Generate() {
 
             <Loading
                 isLoading={isLoading}
-                messages={["Putting things in place..."]}
+                messages={[
+                    "Analyzing Job Description",
+                    "Crafting Your Cover Letter",
+                    "Finalizing Details",
+                ]}
                 overlay
             />
         </div>

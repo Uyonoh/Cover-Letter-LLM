@@ -1,5 +1,7 @@
+type UUID = string;
+
 interface Profile {
-  id: string;
+  id: UUID;
   first_name: string;
   last_name: string;
   created_at: string;

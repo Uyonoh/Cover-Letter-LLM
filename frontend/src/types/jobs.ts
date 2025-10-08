@@ -1,6 +1,8 @@
+type UUID = string;
+
 interface Job {
-  id: string;
-  user_id: string;
+  id: UUID;
+  user_id: UUID;
   title: string;
   company: string | undefined;
   description: string | undefined;

@@ -1,5 +1,7 @@
+type UUID = string;
+
 interface User {
-  id: string;
+  id: UUID;
   email: string;
   password: string;
 }
