@@ -10,6 +10,9 @@ function Profile() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [career_title, setCareerTitle] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [location, setLocation] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -26,7 +29,7 @@ function Profile() {
 
         const { data: profile, error } = await supabase
           .from("profiles")
-          .select("first_name, last_name")
+          .select("first_name, last_name, career_title, location")
           .eq("id", session.user.id)
           .maybeSingle();
 
@@ -37,6 +40,10 @@ function Profile() {
         setFirstName(profile?.first_name ?? "");
         setLastName(profile?.last_name ?? "");
         setEmail(session.user.email || "");
+        setCareerTitle(profile?.career_title ?? "");
+        setPhoneNumber(session.user.phone || "");
+        setLocation(profile?.location ?? "");
+
       } finally {
         setIsLoading(false);
       }
@@ -58,14 +65,17 @@ function Profile() {
       }
 
       const updates = {
-        id: session.user.id,
         first_name: firstName,
         last_name: lastName,
-        email, // optional: Supabase auth email is separate, so this may need supabase.auth.updateUser
-        updated_at: new Date(),
+        career_title,
+        location,
+        // updated_at: new Date(),
       };
 
-      const { error } = await supabase.from("profiles").upsert(updates);
+      const { error } = await supabase
+      .from("profiles")
+      .update(updates)
+      .eq("id", session.user.id)
 
       if (error) {
         console.error("Error updating profile:", error.message);
@@ -127,12 +137,26 @@ function Profile() {
           </div>
 
           <div className="flex flex-col gap-2">
-            <label htmlFor="job-title">Job Title</label>
+            <label htmlFor="career-title">Career Title</label>
             <input
               type="text"
-              name="job-title"
+              name="career-title"
               className="form-input"
               placeholder="eg. Software Engineer"
+              value={career_title}
+              onChange={(e) => setCareerTitle(e.target.value)}
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label htmlFor="phone">Phone Number</label>
+            <input
+              type="text"
+              name="phone"
+              className="form-input"
+              placeholder="eg. +1234567890"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
             />
           </div>
 
@@ -143,6 +167,8 @@ function Profile() {
               name="location"
               className="form-input"
               placeholder="eg. San Francisco, CA"
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
             />
           </div>
           {/* submit */}
@@ -157,8 +183,8 @@ function Profile() {
           </div>
         </form>
       </section>
-
-      {/* Account settings */}
+{/*
+      Account settings
       <section className="account-settings flex flex-col w-full py-5 pb-10 border-b border-secondary">
         <h3 className="font-bold text-xl">Account Settings</h3>
         <div className="flex flex-col sm:grid sm:grid-cols-2 gap-7 py-2">
@@ -192,8 +218,8 @@ function Profile() {
           </div>
         </div>
       </section>
-
-      {/* Subscription */}
+ 
+      Subscription
       <section className="subscription py-5 pb-10 border-b border-secondary">
         <h3 className="font-bold text-xl">Subscription</h3>
         <div className="flex flex-1 flex-col px-2 py-2 gap-3">
@@ -207,7 +233,7 @@ function Profile() {
         </div>
       </section>
 
-      {/* Data Privacy */}
+      //Data Privacy
       <section className="data-privacy py-5 pb-10 border-b border-secondary">
         <h3 className="font-bold text-xl">Data Privacy</h3>
         <div className="flex justify-between py-2">
@@ -221,7 +247,7 @@ function Profile() {
             Manage
           </button>
         </div>
-      </section>
+      </section> */}
 
       {/* Delete Account */}
       <section className="delete-account py-5">

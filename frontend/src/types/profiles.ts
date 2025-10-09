@@ -4,6 +4,8 @@ interface Profile {
   id: UUID;
   first_name: string;
   last_name: string;
+  career_title: string;
+  location: string;
   created_at: string;
   profile_completed: boolean;
 }
