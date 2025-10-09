@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/utils/api";
 import { supabase } from "@/utils/supabaseClient";
+import { DeleteConfirmationDialog } from "@/components/DeleteConfirmationDialog";
 import Loading from "@/components/Loading";
 
 function Profile() {
@@ -14,6 +15,7 @@ function Profile() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [location, setLocation] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -80,11 +82,37 @@ function Profile() {
       if (error) {
         console.error("Error updating profile:", error.message);
         alert("Could not save profile.");
+      } 
+
+      // Update email and phone in auth
+      const { error:userError } = await supabase.auth.updateUser({
+        email: email,
+        // phone: phoneNumber,
+      });
+
+      if (userError) {
+        console.error("Error updating profile:", userError.message);
+        alert("Could not save profile.");
       } else {
         alert("Profile updated successfully!");
       }
+      
     } finally {
       setIsLoading(false);
+    }
+  }
+
+  async function handleDeleteAccount() {
+    try {
+      const response = await apiFetch("/auth/delete-account", {
+        method: "POST",
+        body: JSON.stringify({}),
+      });
+    }
+    catch (error) {
+      console.error("Error deleting account:", error);
+      alert("Failed to delete account. Please try again.");
+      return;
     }
   }
 
@@ -259,11 +287,20 @@ function Profile() {
               Permanently delete your account and all of your data
             </p>
           </div>
-          <button className="bg-red-500/80 text-white rounded-lg w-33 h-10 cursor-pointer">
+          <button className="bg-red-500/80 text-white rounded-lg w-33 h-10 cursor-pointer"
+          onClick={(e) => setIsDeleteDialogOpen(true)}
+          >
             Delete Account
           </button>
         </div>
       </section>
+
+      <DeleteConfirmationDialog
+      isOpen={isDeleteDialogOpen}
+      onCancel={() => setIsDeleteDialogOpen(false)}
+      prompt="Are you sure you want to DELETE your account? This action CANNOT be undone."
+      onConfirm={handleDeleteAccount}
+      />
 
       <Loading
         isLoading={isLoading}

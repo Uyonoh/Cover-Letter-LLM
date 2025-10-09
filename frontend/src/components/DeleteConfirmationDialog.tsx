@@ -2,12 +2,14 @@ import React from "react";
 
 type Props = {
   isOpen: boolean;
+  prompt?: string;
   onCancel: () => void;
   onConfirm: () => void;
 };
 
 export function DeleteConfirmationDialog({
   isOpen,
+  prompt,
   onCancel,
   onConfirm,
 }: Props) {
@@ -34,8 +36,7 @@ export function DeleteConfirmationDialog({
           id="delete-dialog-description"
           className="mt-2 text-white/80"
         >
-          Are you sure you want to delete this letter? This action cannot be
-          undone.
+          {prompt || "Are you sure you want to delete this letter? This action cannot be undone."}
         </p>
 
         <div className="mt-6 flex justify-end space-x-3">
