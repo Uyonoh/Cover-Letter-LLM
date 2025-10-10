@@ -32,7 +32,7 @@ function Profile() {
 
         const { data: profile, error } = await supabase
           .from("profiles")
-          .select("first_name, last_name, career_title, location")
+          .select("first_name, last_name, career_title, location, phone_number")
           .eq("id", session.user.id)
           .maybeSingle();
 
@@ -44,7 +44,7 @@ function Profile() {
         setLastName(profile?.last_name ?? "");
         setEmail(session.user.email || "");
         setCareerTitle(profile?.career_title ?? "");
-        setPhoneNumber(session.user.phone || "");
+        setPhoneNumber(profile?.phone_number || "");
         setLocation(profile?.location ?? "");
 
       } finally {
@@ -72,6 +72,7 @@ function Profile() {
         last_name: lastName,
         career_title,
         location,
+        phone_number: phoneNumber,
         // updated_at: new Date(),
       };
 

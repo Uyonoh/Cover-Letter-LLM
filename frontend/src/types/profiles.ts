@@ -6,6 +6,7 @@ interface Profile {
   last_name: string;
   career_title: string;
   location: string;
+  phone_number: string;
   created_at: string;
   profile_completed: boolean;
 }
