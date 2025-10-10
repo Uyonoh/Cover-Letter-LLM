@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Response, Depends, HTTPException
+from fastapi import APIRouter, Request, Response, Depends, HTTPException
 from fastapi.responses import JSONResponse
-from app.models.schemas.auth import BaseModel, User, UserProfile, UserCreateForm, UserLoginForm
-from app.services.db import get_supabase_client, verify_token, Client
+from app.dependencies import get_current_user
+from app.models.schemas.auth import BaseModel, User, UserProfile, UserCreateForm, UserLoginForm, Dict, Any
+from app.services.db import get_supabase_client, get_service_client, verify_token, Client
 from supabase_auth.errors import AuthApiError
 import os
 
@@ -86,6 +87,7 @@ async def login(
     response: Response,
     supabase: Client = Depends(get_supabase_client),
     ):
+    
     # Use supabase client here to authenticate
     try:
         user = supabase.auth.sign_in_with_password({"email": body.email, "password": body.password})
@@ -112,3 +114,39 @@ async def login(
     if ENV == "dev":
         return JSONResponse({"access_token": access_token}, status_code=200)
     return JSONResponse({"message": "Login successful"}, status_code=200)
+
+@router.post("/delete-account")
+async def delete_account(
+    
+    response: Response,
+    user: Dict[str, Any]=Depends(get_current_user),
+    supabase: Client = Depends(get_service_client),
+):
+    """
+    Deletes the authenticated user's account and associated profile data.
+    This endpoint performs the following actions:
+    - Deletes the user from the authentication system.
+    - Removes any additional user-related data (extend as needed).
+    - Clears the user's access token cookie.
+    Args:
+        response (Response): The response object used to modify cookies.
+        user (Dict[str, Any]): The currently authenticated user, injected via dependency.
+        supabase (Client): The Supabase client instance, injected via dependency.
+    Raises:
+        HTTPException: If an error occurs during account deletion.
+    Returns:
+        JSONResponse: A message indicating successful account deletion.
+    """
+
+    try:
+        # Delete user from auth
+        supabase.auth.admin.delete_user(user["sub"])
+
+        # Delete other user-related data here
+
+    except Exception as e:
+        print(f"Error deleting account: {e}")
+        raise HTTPException(status_code=500, detail="Error deleting account")
+
+    response.delete_cookie("sb_access_token")
+    return JSONResponse({"message": "Account deleted successfully"})

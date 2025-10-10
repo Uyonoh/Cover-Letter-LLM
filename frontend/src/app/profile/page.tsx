@@ -16,6 +16,7 @@ function Profile() {
   const [location, setLocation] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -103,16 +104,29 @@ function Profile() {
   }
 
   async function handleDeleteAccount() {
+    setIsDeleteDialogOpen(false);
+    setIsDeleting(true);
+    
     try {
       const response = await apiFetch("/auth/delete-account", {
         method: "POST",
-        body: JSON.stringify({}),
       });
-    }
-    catch (error) {
+
+      if(!response.ok){
+        const err = await response.text();
+        console.error("Error deleting account:", err);
+        alert(`Failed to delete account: ${err}`);
+        return;
+      }
+
+      await supabase.auth.signOut();
+      router.push("/");
+    } catch (error) {
       console.error("Error deleting account:", error);
       alert("Failed to delete account. Please try again.");
       return;
+    } finally { 
+      setIsDeleting(false);
     }
   }
 
@@ -309,6 +323,17 @@ function Profile() {
           "Validating Information",
           "Just a moment",
         ]}
+        overlay
+      />
+
+      <Loading
+        isLoading={isDeleting}
+        messages={[
+          "Fetching Profile",
+          "Shredding Information",
+          "Sending you off",
+        ]}
+        // color="danger"
         overlay
       />
     </div>

@@ -7,6 +7,7 @@
   --primary: #0d7ff2;
   --secondary: #888c91;
   --secondary\/10: #888c911a;
+  --danger: #fb2c36;
 }
 
 @theme inline {
@@ -14,6 +15,7 @@
   --color-background-light: var(--background-light);
   --color-foreground: var(--foreground);
   --color-primary: var(--primary);
+  --color-danger: var(--danger);
   --color-secondary: var(--secondary);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);

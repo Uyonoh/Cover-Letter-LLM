@@ -8,6 +8,7 @@ interface LoadingProps {
   overlay?: boolean;
   finalMessage?: string;
   delay?: number;
+  color?: string;
 }
 
 function Loading({
@@ -15,7 +16,8 @@ function Loading({
   messages = [],
   overlay,
   finalMessage = "Almost done...",
-  delay=2500 // In ms
+  delay=2500, // In ms
+  color="primary",
 }: LoadingProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [doneCycling, setDoneCycling] = useState(false);
@@ -60,7 +62,7 @@ function Loading({
                 {displayMessage}
               </h1>
             )}
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary" />
+            <div className={`animate-spin rounded-full h-12 w-12 border-t-2 border-${color}`} />
           </div>
         </div>
       )}
