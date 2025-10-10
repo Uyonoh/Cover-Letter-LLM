@@ -6,9 +6,14 @@ import { supabase } from '@/utils/supabaseClient'
 
 export default function CompleteProfile() {
   const router = useRouter()
+  const [step, setStep] = useState(1)
+  const [isLoading, setIsLoading] = useState(false)
+
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+  const [careerTitle, setCareerTitle] = useState('')
+  const [location, setLocation] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState('')
 
   useEffect(() => {
     const loadUser = async () => {
@@ -34,12 +39,15 @@ export default function CompleteProfile() {
 
     const { error } = await supabase
       .from('profiles')
-      .insert({
+      .upsert({
+        id: session.user.id,
         first_name: firstName,
         last_name: lastName,
+        career_title: careerTitle,
+        location,
+        phone_number: phoneNumber,
         profile_completed: true,
       })
-      .eq('id', session.user.id)
 
     setIsLoading(false)
 
@@ -51,46 +59,96 @@ export default function CompleteProfile() {
     }
   }
 
+  const nextStep = () => setStep((s) => Math.min(s + 1, 3))
+  const prevStep = () => setStep((s) => Math.max(s - 1, 1))
+
   return (
     <div className="flex flex-col items-center justify-center h-[90vh] bg-background text-foreground">
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col gap-5 w-full max-w-md bg-background-light p-8 rounded-lg shadow-md border border-secondary/10"
+        className="flex flex-col gap-5 w-full max-w-md bg-background-light p-8 rounded-lg shadow-md border border-secondary/10 transition-all duration-500"
       >
-        <h1 className="text-2xl font-bold text-foreground">Complete Your Profile</h1>
-        <p className="text-secondary">Just a few more details to get started</p>
+        <h1 className="text-2xl font-bold">Complete Your Profile</h1>
+        <p className="text-secondary">Step {step} of 3</p>
 
-        <div className="flex flex-col gap-2">
-          <label htmlFor="firstName" className="text-secondary">First Name</label>
-          <input
-            id="firstName"
-            type="text"
-            className="form-input bg-background border border-secondary/10 text-foreground placeholder-secondary"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            required
-          />
-        </div>
+        {/* Step 1: Basic Info */}
+        {step === 1 && (
+          <div className="flex flex-col gap-4 animate-fade-in">
+            <div>
+              <label className="text-secondary">First Name</label>
+              <input
+                type="text"
+                className="form-input"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label className="text-secondary">Last Name</label>
+              <input
+                type="text"
+                className="form-input"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                required
+              />
+            </div>
+            <button type="button" onClick={nextStep} className="btn-primary">Next</button>
+          </div>
+        )}
 
-        <div className="flex flex-col gap-2">
-          <label htmlFor="lastName" className="text-secondary">Last Name</label>
-          <input
-            id="lastName"
-            type="text"
-            className="form-input bg-background border border-secondary/10 text-foreground placeholder-secondary"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            required
-          />
-        </div>
+        {/* Step 2: Professional Info */}
+        {step === 2 && (
+          <div className="flex flex-col gap-4 animate-fade-in">
+            <div>
+              <label className="text-secondary">Career Title</label>
+              <input
+                type="text"
+                className="form-input"
+                value={careerTitle}
+                onChange={(e) => setCareerTitle(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label className="text-secondary">Location</label>
+              <input
+                type="text"
+                className="form-input"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                required
+              />
+            </div>
+            <div className="flex justify-between">
+              <button type="button" onClick={prevStep} className="btn-secondary">Back</button>
+              <button type="button" onClick={nextStep} className="btn-primary">Next</button>
+            </div>
+          </div>
+        )}
 
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="bg-primary text-foreground font-semibold rounded-lg py-2 hover:bg-primary/90 transition-colors"
-        >
-          {isLoading ? 'Saving...' : 'Save & Continue'}
-        </button>
+        {/* Step 3: Contact Info */}
+        {step === 3 && (
+          <div className="flex flex-col gap-4 animate-fade-in">
+            <div>
+              <label className="text-secondary">Phone Number</label>
+              <input
+                type="tel"
+                className="form-input"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                required
+              />
+            </div>
+            <div className="flex justify-between">
+              <button type="button" onClick={prevStep} className="btn-secondary">Back</button>
+              <button type="submit" disabled={isLoading} className="btn-primary">
+                {isLoading ? 'Saving...' : 'Save & Finish'}
+              </button>
+            </div>
+          </div>
+        )}
       </form>
     </div>
   )
