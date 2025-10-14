@@ -9,6 +9,9 @@ from google import genai
 from google.genai import types
 from dotenv import load_dotenv
 
+from app.models.schemas.cover_letters import GenerateLetterRequest
+from fastapi import APIRouter, Depends, Request, HTTPException
+
 load_dotenv()
 
 
@@ -49,27 +52,34 @@ def initialize_model(api_key=API_KEY, **kwargs):
     return client
 
 
-async def generate_cover_letter(model:str,job_title:str, job_description:str, resume_text:str, client:genai.Client=None):
+async def generate_cover_letter(model:str, request: GenerateLetterRequest, resume_text:str, client:genai.Client=None):
     if client == None:
         client = initialize_model(API_KEY)
+    
+    if "creative" in request.modifiers:
+        config.temperature = 0.9
+        config.top_p = 0.95
 
     prompt = f"""
     You are a professional career assistant. Write a personalized, engaging, and concise cover letter tailored to the job description and resume below.
 
     Job Title:
-    {job_title}
+    {request.job_title}
 
     Job Description:
-    {job_description}
+    {request.job_description}
 
     Candidate Resume:
     {resume_text}
 
     Cover letter requirements:
-    - 3 short paragraphs (intro, match, enthusiasm)
-    - Use professional, warm tone
+    - 3 {request.length} paragraphs (intro, match, enthusiasm)
+    - Use a {request.style} tone
     - Avoid generic phrases (e.g., "I'm a hardworking individual")
     - Mention 1–2 specific qualifications from resume that align with the job
+    {"- Highlight leadership experience" if "leadership" in request.modifiers else ""}
+    {"- Emphasize poblem-solving skills" if "problemSolving" in request.modifiers else ""}
+    {" - Showcase technical expertise" if "technical" in request.modifiers else ""}
     - Include the company or role name
     - End with a brief call to action
     - Use a plain text format

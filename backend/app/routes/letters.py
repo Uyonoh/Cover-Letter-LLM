@@ -55,10 +55,9 @@ async def generate(
 
     # Generate Cover letter
     content = await generate_cover_letter(
-        "gemini-2.5-flash",
-        body.job_title,
-        body.job_description,
-        resume,
+        model="gemini-2.5-flash",
+        request=body,
+        resume_text=resume,
     )
 
 
