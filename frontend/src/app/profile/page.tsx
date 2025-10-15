@@ -1,11 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { CloudUpload, FileText, Eye, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { apiFetch } from "@/utils/api";
 import { supabase } from "@/utils/supabaseClient";
 import { DeleteConfirmationDialog } from "@/components/DeleteConfirmationDialog";
 import Loading from "@/components/Loading";
+import { formatFileSize } from "@/utils/helpers";
+import type { Resume } from "@/types/resumes";
 
 function Profile() {
   const [firstName, setFirstName] = useState("");
@@ -15,8 +18,12 @@ function Profile() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [location, setLocation] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [resumes, setResumes] = useState<Resume[]>([]);
+
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [isDeletingUser, setIsDeletingUser] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -47,6 +54,11 @@ function Profile() {
         setPhoneNumber(profile?.phone_number || "");
         setLocation(profile?.location ?? "");
 
+        // Resume
+        const { data: resumes } = await supabase
+          .from("resumes")
+          .select("file_name, file_size, uploaded_at, storage_path");
+        setResumes(resumes || []);
       } finally {
         setIsLoading(false);
       }
@@ -77,17 +89,17 @@ function Profile() {
       };
 
       const { error } = await supabase
-      .from("profiles")
-      .update(updates)
-      .eq("id", session.user.id)
+        .from("profiles")
+        .update(updates)
+        .eq("id", session.user.id);
 
       if (error) {
         console.error("Error updating profile:", error.message);
         alert("Could not save profile.");
-      } 
+      }
 
       // Update email and phone in auth
-      const { error:userError } = await supabase.auth.updateUser({
+      const { error: userError } = await supabase.auth.updateUser({
         email: email,
         // phone: phoneNumber,
       });
@@ -98,22 +110,74 @@ function Profile() {
       } else {
         alert("Profile updated successfully!");
       }
-      
     } finally {
       setIsLoading(false);
     }
   }
 
+  async function handleUpload(file: File, userId: string) {
+    console.log("Uploading file:", file);
+    const { data, error } = await supabase.storage
+      .from("resumes")
+      .upload(`${userId}/${file.name}`, file, {
+        cacheControl: "3600",
+        upsert: true, // overwrite if same name
+      });
+
+    if (error) {
+      console.error("Upload failed:", error.message);
+      alert("Upload failed");
+      return;
+    }
+
+    console.log("Uploaded:", data);
+
+    const { data: data2, error: error2 } = await supabase.from("resumes")
+    .upsert({
+      user_id: userId,
+      file_name: file.name,
+      file_size: file.size,
+      file_type: file.type,
+      storage_path: `${userId}/${file.name}`,
+    })
+    .select();
+
+    if (error2) {
+      console.error("File registration failed:", error2.message);
+      alert("Upload failed");
+      return;
+    }
+    if (data2) setResumes([...resumes, data2[0]]);
+    alert("Upload successful!");
+  }
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    console.log("File input changed", e.target.files);
+    const file = e.target.files?.[0];
+    console.log("File selected", file);
+    if (file && file.size <= 5 * 1024 * 1024) {
+      setResumeFile(file);
+      if (file) {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        await handleUpload(file, session?.user.id || "");
+      }
+    } else {
+      alert("File must be under 5MB.");
+    }
+  }
+
   async function handleDeleteAccount() {
     setIsDeleteDialogOpen(false);
-    setIsDeleting(true);
-    
+    setIsDeletingUser(true);
+
     try {
       const response = await apiFetch("/auth/delete-account", {
         method: "POST",
       });
 
-      if(!response.ok){
+      if (!response.ok) {
         const err = await response.text();
         console.error("Error deleting account:", err);
         alert(`Failed to delete account: ${err}`);
@@ -126,8 +190,8 @@ function Profile() {
       console.error("Error deleting account:", error);
       alert("Failed to delete account. Please try again.");
       return;
-    } finally { 
-      setIsDeleting(false);
+    } finally {
+      setIsDeletingUser(false);
     }
   }
 
@@ -226,7 +290,91 @@ function Profile() {
           </div>
         </form>
       </section>
-{/*
+
+      {/* Resume */}
+      <div className="border-t border-gray-200/10 dark:border-gray-700/50"></div>
+      <section>
+        <h3 className="text-xl font-bold leading-tight text-gray-900 dark:text-white">
+          Your Resume
+        </h3>
+        <div className="mt-6">
+          <div className="flex items-center justify-center w-full">
+            <label
+              className={`flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer bg-background-light dark:hover:bg-bray-800 dark:bg-background-dark/50 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-background-dark/80` + 
+                (resumes? " hidden": "")}
+              htmlFor="dropzone-file"
+            >
+              <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                <span className="material-symbols-outlined text-4xl text-gray-500 dark:text-gray-400">
+                  <CloudUpload />
+                </span>
+                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                  <span className="font-semibold">Click to upload</span> or drag
+                  and drop
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  PDF, DOCX (MAX. 5MB)
+                </p>
+              </div>
+              <input
+                className="hidden"
+                id="dropzone-file"
+                type="file"
+                accept=".pdf,.doc,.docx"
+                onChange={handleFileChange}
+              />
+            </label>
+          </div>
+          <div className="mt-6 rounded-lg bg-background-light p-4 dark:bg-background-dark/50 flex flex-col gap-2">
+          {!resumes && <p>No resumes uploaded yet.</p>}
+            {resumes.map((resume) => (
+              <div
+                key={resume.storage_path}
+                className="flex items-center justify-between"
+              >
+                <div className="flex items-center gap-4">
+                  <FileText className="text-primary" size={28} />
+                  <div>
+                    <p className="font-medium">{resume.file_name}</p>
+                    <p className="text-sm text-gray-500">
+                      {formatFileSize(resume.file_size)} –
+                      Uploaded on{" "}
+                      {new Date(resume.uploaded_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    className="flex h-9 w-9 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-200/50 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700/50 dark:hover:text-white"
+                    onClick={async () => {
+                      // only fetch signed URL when user clicks
+                      const { data } = await supabase.storage
+                        .from("resumes")
+                        .createSignedUrl(resume.storage_path, 60);
+                      window.open(data?.signedUrl, "_blank");
+                    }}
+                  >
+                    <Eye />
+                  </button>
+                  <button
+                    className="flex h-9 w-9 items-center justify-center rounded-lg text-red-500 transition-colors hover:bg-red-500/10"
+                    onClick={async () => {
+                      await supabase.storage
+                        .from("resumes")
+                        .remove([resume.storage_path]);
+                      // refresh UI
+                    }}
+                  >
+                    <Trash2 />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      <div className="border-t border-gray-200/10 dark:border-gray-700/50"></div>
+      {/*
       Account settings
       <section className="account-settings flex flex-col w-full py-5 pb-10 border-b border-secondary">
         <h3 className="font-bold text-xl">Account Settings</h3>
@@ -302,8 +450,9 @@ function Profile() {
               Permanently delete your account and all of your data
             </p>
           </div>
-          <button className="bg-red-500/80 text-white rounded-lg w-33 h-10 cursor-pointer"
-          onClick={(e) => setIsDeleteDialogOpen(true)}
+          <button
+            className="bg-red-500/80 text-white rounded-lg w-33 h-10 cursor-pointer"
+            onClick={(e) => setIsDeleteDialogOpen(true)}
           >
             Delete Account
           </button>
@@ -311,10 +460,10 @@ function Profile() {
       </section>
 
       <DeleteConfirmationDialog
-      isOpen={isDeleteDialogOpen}
-      onCancel={() => setIsDeleteDialogOpen(false)}
-      prompt="Are you sure you want to DELETE your account? This action CANNOT be undone."
-      onConfirm={handleDeleteAccount}
+        isOpen={isDeleteDialogOpen}
+        onCancel={() => setIsDeleteDialogOpen(false)}
+        prompt="Are you sure you want to DELETE your account? This action CANNOT be undone."
+        onConfirm={handleDeleteAccount}
       />
 
       <Loading
@@ -328,7 +477,7 @@ function Profile() {
       />
 
       <Loading
-        isLoading={isDeleting}
+        isLoading={isDeletingUser}
         messages={[
           "Fetching Profile",
           "Shredding Information",
