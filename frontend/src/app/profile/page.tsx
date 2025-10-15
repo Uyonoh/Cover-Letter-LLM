@@ -232,9 +232,9 @@ function Profile() {
 
         <form
           onSubmit={handleSaveProfile}
-          className="sm:grid grid-cols-2 gap-5 py-2 text-secondary"
+          className="flex flex-col sm:grid sm:grid-cols-2  gap-5 py-2 text-secondary"
         >
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1">
             <label htmlFor="first-name">First Name</label>
             <input
               type="text"
@@ -246,7 +246,7 @@ function Profile() {
             />
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1">
             <label htmlFor="last-name">Last Name</label>
             <input
               type="text"
@@ -258,7 +258,7 @@ function Profile() {
             />
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1">
             <label htmlFor="email">Email</label>
             <input
               type="email"
@@ -270,7 +270,7 @@ function Profile() {
             />
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1">
             <label htmlFor="career-title">Career Title</label>
             <input
               type="text"
@@ -282,7 +282,7 @@ function Profile() {
             />
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1">
             <label htmlFor="phone">Phone Number</label>
             <input
               type="text"
@@ -294,7 +294,7 @@ function Profile() {
             />
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1">
             <label htmlFor="location">Location</label>
             <input
               type="text"
@@ -319,11 +319,8 @@ function Profile() {
       </section>
 
       {/* Resume */}
-      <div className="border-t border-gray-200/10 dark:border-gray-700/50"></div>
-      <section>
-        <h3 className="text-xl font-bold leading-tight text-gray-900 dark:text-white">
-          Your Resume
-        </h3>
+      <section className="personal py-5 pb-10 border-b border-secondary">
+        <h3 className="text-xl font-bold">Your Resume</h3>
         <div className="mt-6">
           <div className="flex items-center justify-center w-full">
             <label
@@ -359,13 +356,14 @@ function Profile() {
                 key={resume.storage_path}
                 className="flex items-center justify-between"
               >
-                <div className="flex items-center gap-4">
-                  <FileText className="text-primary" size={28} />
-                  <div>
-                    <p className="font-medium">{resume.file_name}</p>
+                <div className="flex items-center gap-4 flex-1 min-w-0">
+                  <FileText className="text-primary shrink-0" size={28} />
+                  <div className="min-w-0">
+                    <p className="font-medium truncate">{resume.file_name}</p>
                     <p className="text-sm text-gray-500">
-                      {formatFileSize(resume.file_size)} –
-                      Uploaded on{" "}
+                      {formatFileSize(resume.file_size)}
+                      <span className="hidden sm:inline"> – Uploaded on </span>
+                      <span className="inline sm:hidden"> | </span>
                       {new Date(resume.uploaded_at).toLocaleDateString()}
                     </p>
                   </div>
@@ -468,7 +466,7 @@ function Profile() {
       {/* Delete Account */}
       <section className="delete-account py-5">
         <h3 className="font-bold text-xl text-red-500 py-2">Danger Zone</h3>
-        <div className="flex justify-between px-2 py-5 border border-red-400 rounded-lg bg-red-700/10 ">
+        <div className="flex justify-between items-center px-2 py-5 border border-red-400 rounded-lg bg-red-700/10 ">
           <div className="flex flex-col gap-2">
             <p>Delete Account</p>
             <p className="text-secondary">
@@ -479,7 +477,8 @@ function Profile() {
             className="bg-red-500/80 text-white rounded-lg w-33 h-10 cursor-pointer"
             onClick={(e) => setIsDeleteUserDialogOpen(true)}
           >
-            Delete Account
+            Delete
+            <span className="hidden sm:inline"> Account</span>
           </button>
         </div>
       </section>
