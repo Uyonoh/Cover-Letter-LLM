@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Json
-from typing import Any, Dict
+from typing import Any, Optional, Dict, List
 import uuid
 from uuid import UUID
 from datetime import datetime
@@ -31,3 +31,25 @@ class ListLetterResponse(BaseModel):
 
 class ViewLetterResponse(CoverLetter):
   jobs: Job
+
+
+class SkillsFromJD(BaseModel):
+    backend: Optional[List[str]] = []
+    frontend: Optional[List[str]] = []
+    databases: Optional[List[str]] = []
+    general: Optional[List[str]] = []
+    devops: Optional[List[str]] = []
+
+class ModelResponse(BaseModel):
+    job_title: str
+    company_name: str
+    location: Optional[str] = None
+    employment_type: Optional[str] = None
+    seniority_level: Optional[str] = None
+    salary: Optional[str] = None
+    benefits: Optional[List[str]] = []
+    responsibilities: Optional[List[str]] = []
+    qualifications: Optional[List[str]] = []
+    preferred_skills: Optional[List[str]] = []
+    skills: SkillsFromJD
+    cover_letter: str

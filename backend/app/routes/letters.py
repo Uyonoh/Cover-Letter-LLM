@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Request, HTTPException
 from app.dependencies import get_current_user
 from app.services.db import get_supabase_client, get_service_client, verify_token, Client, User
 from app.services.gemini import generate_cover_letter, resume
-from app.models.schemas.cover_letters import GenerateLetterRequest, CoverLetter, datetime, uuid, Dict, Any
+from app.models.schemas.cover_letters import GenerateLetterRequest, CoverLetter, ModelResponse, datetime, uuid, Dict, Any
 import os
 
 ENV = os.getenv("ENV", "dev")
@@ -54,37 +54,46 @@ async def generate(
     user_id: str = user["sub"]
 
     # Generate Cover letter
-    content = await generate_cover_letter(
-        model="gemini-2.5-flash",
-        request=body,
-        resume_text=resume,
-    )
+    try:
+        content: ModelResponse = await generate_cover_letter(
+            model="gemini-2.5-flash",
+            request=body,
+            resume_text=resume,
+        )
 
+        job = {
+            "user_id": user_id,
+            # Prefer user-provided job_title, otherwise use extracted one
+            "title": body.job_title or content.job_title,
+            "company": content.company_name or "NIL",
+            "description": body.job_description,
+            "location": content.location,
+            "employment_type": content.employment_type,
+            "seniority_level": content.seniority_level,
+            "salary": content.salary,
+        }
 
-    job = {
-        "user_id": user_id,
-        "title": body.job_title,
-        "company": "NIL",
-        "description": body.job_description,
-    }
-    res = supabase.table("jobs").insert(job).execute()
-    job_id = res.data[0].get("id")
-    # content = predict(request.job_title, request.job_description)
+        res = supabase.table("jobs").insert(job).execute()
+        job_id = res.data[0].get("id")
+        # content = predict(request.job_title, request.job_description)
 
-    data: CoverLetter = {
-        "user_id": user_id,
-        "job_id": job_id,
-        "content": content,
-        "version": 1,
-        "style": body.style,
-        "length": body.length,
-        "modifiers": body.modifiers,
-    }
+        data: CoverLetter = {
+            "user_id": user_id,
+            "job_id": job_id,
+            "content": content.description,
+            "version": 1,
+            "style": body.style,
+            "length": body.length,
+            "modifiers": body.modifiers,
+        }
 
-    res = supabase.table("cover_letters").insert(data).execute()
-    letter_id = res.data[0].get("id")
+        res = supabase.table("cover_letters").insert(data).execute()
+        letter_id = res.data[0].get("id")
 
-    return {"letter_id": letter_id}
+        return {"letter_id": letter_id}
+
+    except Exception as e:
+        return HTTPException(status_code=500, detail=str(e))
 
 @router.get("/{letter_id}")
 async def view(

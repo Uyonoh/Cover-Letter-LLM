@@ -3,16 +3,21 @@ Integrate gemini API for letter generation
 """
 
 import os
-from typing import Optional, Tuple
+import json
+from typing import Optional, Tuple, List
 import logging
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
 
-from app.models.schemas.cover_letters import GenerateLetterRequest
-from fastapi import APIRouter, Depends, Request, HTTPException
+from app.models.schemas.cover_letters import GenerateLetterRequest, ModelResponse
 
 load_dotenv()
+
+class GeminiResponseError(Exception):
+    """Raised when the Gemini API returns invalid or malformed data."""
+    pass
+
 
 
 API_KEY = os.getenv("GEMINI_API_KEY")
@@ -42,7 +47,7 @@ config = types.GenerateContentConfig(
     temperature=0.7,
     top_p=1,
     top_k=32,
-    max_output_tokens=2048,
+    max_output_tokens=10000,
     safety_settings=safety_settings
 )
 
@@ -61,31 +66,62 @@ async def generate_cover_letter(model:str, request: GenerateLetterRequest, resum
         config.top_p = 0.95
 
     prompt = f"""
-    You are a professional career assistant. Write a personalized, engaging, and concise cover letter tailored to the job description and resume below.
+        You are a professional career assistant. Your task is to generate a personalized, engaging, and concise cover letter tailored to the job description and candidate resume provided below. 
 
-    Job Title:
-    {request.job_title}
+        Input:
+        - Job Title: {request.job_title}
+        - Job Description: {request.job_description}
+        - Candidate Resume: {resume_text}
 
-    Job Description:
-    {request.job_description}
+        Cover letter requirements:
+        - Exactly 3 {request.length} paragraphs:
+        1. Introduction
+        2. Alignment of candidate’s skills/experience with the role
+        3. Enthusiasm and call to action
+        - Use a {request.style} tone
+        - Avoid generic phrases (e.g., "I'm a hardworking individual")
+        - Mention 1–2 specific qualifications from the resume that align with the job
+        {"- Highlight leadership experience" if "leadership" in request.modifiers else ""}
+        {"- Emphasize problem-solving skills" if "problemSolving" in request.modifiers else ""}
+        {"- Showcase technical expertise" if "technical" in request.modifiers else ""}
+        - Explicitly include the company or role name
+        - End with a brief call to action
+        - Use plain text (no Markdown, no formatting)
 
-    Candidate Resume:
-    {resume_text}
+        Additional task:
+        Parse the job description and extract the following fields:
+        - job_title
+        - company_name
+        - location
+        - employment_type (e.g., full-time, part-time, contract, internship)
+        - seniority_level (e.g., junior, mid-level, senior, lead)
+        - salary
+        - benefits (list of perks, if mentioned)
+        - responsibilities (list of duties/tasks)
+        - qualifications (required skills/experience)
+        - preferred_skills (nice-to-have skills)
+        - skills (grouped logically: backend, frontend, databases, general, devops, etc.)
 
-    Cover letter requirements:
-    - 3 {request.length} paragraphs (intro, match, enthusiasm)
-    - Use a {request.style} tone
-    - Avoid generic phrases (e.g., "I'm a hardworking individual")
-    - Mention 1–2 specific qualifications from resume that align with the job
-    {"- Highlight leadership experience" if "leadership" in request.modifiers else ""}
-    {"- Emphasize poblem-solving skills" if "problemSolving" in request.modifiers else ""}
-    {" - Showcase technical expertise" if "technical" in request.modifiers else ""}
-    - Include the company or role name
-    - End with a brief call to action
-    - Use a plain text format
+        Output format:
+        Respond with **only valid JSON** (no Markdown code fences, no extra commentary).
+        The JSON must follow this structure:
 
-    Respond with ONLY the cover letter text.
-
+        {{
+        "job_title": "...",
+        "company_name": "...",
+        "location": "...",
+        "employment_type": "...",
+        "seniority_level": "...",
+        "salary": "...",
+        "benefits": ["..."],
+        "responsibilities": ["..."],
+        "qualifications": ["..."],
+        "preferred_skills": ["..."],
+        "skills": {{
+            group: skills,
+        }},
+        "cover_letter": "..."
+        }}
     """
 
     response = client.models.generate_content(
@@ -93,8 +129,13 @@ async def generate_cover_letter(model:str, request: GenerateLetterRequest, resum
         contents=prompt,
         config=config
     )
-
-    return response.text
+    
+    try:
+        parsed = json.loads(response.text)
+        validated = ModelResponse(**parsed)
+        return validated.model_dump()
+    except Exception as e:
+        raise GeminiResponseError(f"Invalid response format: {str(e)}")
 
 resume = """
 Uyonoh Manasseh Turaki 
