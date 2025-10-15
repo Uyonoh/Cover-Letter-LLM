@@ -19,10 +19,11 @@ function Profile() {
   const [location, setLocation] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [selectedResume, setSelectedResume] = useState<Resume | null>(null);
   const [resumes, setResumes] = useState<Resume[]>([]);
+  const [isDeleteResumeDialogOpen, setIsDeleteResumeDialogOpen] = useState(false);
 
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleteUserDialogOpen, setIsDeleteUserDialogOpen] = useState(false);
   const [isDeletingUser, setIsDeletingUser] = useState(false);
   const router = useRouter();
 
@@ -156,7 +157,6 @@ function Profile() {
     const file = e.target.files?.[0];
     console.log("File selected", file);
     if (file && file.size <= 5 * 1024 * 1024) {
-      setResumeFile(file);
       if (file) {
         const {
           data: { session },
@@ -168,8 +168,35 @@ function Profile() {
     }
   }
 
+  async function handleDeleteResume() {
+    setIsDeleteResumeDialogOpen(false);
+    if (!selectedResume) return;
+    const { data, error } = await supabase.storage
+      .from("resumes")
+      .remove([selectedResume.storage_path]);
+    
+    if (error) {
+      console.error("Error deleting resume from storage:", error.message);
+      alert("Could not delete resume.");
+      return;
+    }
+
+    const { error: dbError } = await supabase.from("resumes")
+      .delete()
+      .eq("storage_path", selectedResume.storage_path);
+    
+    if (dbError) {
+      console.error("Error deleting resume from table:", dbError.message);
+      alert("Could not delete resume.");
+      return;
+    }
+    // refresh UI
+    setResumes(resumes.filter(r => r.storage_path !== selectedResume.storage_path));
+    setSelectedResume(null);
+  }
+
   async function handleDeleteAccount() {
-    setIsDeleteDialogOpen(false);
+    setIsDeleteUserDialogOpen(false);
     setIsDeletingUser(true);
 
     try {
@@ -301,7 +328,7 @@ function Profile() {
           <div className="flex items-center justify-center w-full">
             <label
               className={`flex flex-col items-center justify-center w-full h-64 border-2 border-dashed rounded-lg cursor-pointer bg-background-light dark:hover:bg-bray-800 dark:bg-background-dark/50 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-background-dark/80` + 
-                (resumes? " hidden": "")}
+                (resumes.length > 0 ? " hidden": "")}
               htmlFor="dropzone-file"
             >
               <div className="flex flex-col items-center justify-center pt-5 pb-6">
@@ -358,11 +385,9 @@ function Profile() {
                   </button>
                   <button
                     className="flex h-9 w-9 items-center justify-center rounded-lg text-red-500 transition-colors hover:bg-red-500/10"
-                    onClick={async () => {
-                      await supabase.storage
-                        .from("resumes")
-                        .remove([resume.storage_path]);
-                      // refresh UI
+                    onClick={(e) => {
+                      setSelectedResume(resume);
+                      setIsDeleteResumeDialogOpen(true)
                     }}
                   >
                     <Trash2 />
@@ -452,16 +477,25 @@ function Profile() {
           </div>
           <button
             className="bg-red-500/80 text-white rounded-lg w-33 h-10 cursor-pointer"
-            onClick={(e) => setIsDeleteDialogOpen(true)}
+            onClick={(e) => setIsDeleteUserDialogOpen(true)}
           >
             Delete Account
           </button>
         </div>
       </section>
 
+      {/* Delete confirmation for resume */}
       <DeleteConfirmationDialog
-        isOpen={isDeleteDialogOpen}
-        onCancel={() => setIsDeleteDialogOpen(false)}
+        isOpen={isDeleteResumeDialogOpen}
+        onCancel={() => setIsDeleteResumeDialogOpen(false)}
+        prompt={` ${selectedResume?.file_name} \n\n Are you sure you want to DELETE this resume? This action CANNOT be undone.`}
+        onConfirm={handleDeleteResume}
+      />
+
+      {/* Delete confirmation for user profile */}
+      <DeleteConfirmationDialog
+        isOpen={isDeleteUserDialogOpen}
+        onCancel={() => setIsDeleteUserDialogOpen(false)}
         prompt="Are you sure you want to DELETE your account? This action CANNOT be undone."
         onConfirm={handleDeleteAccount}
       />

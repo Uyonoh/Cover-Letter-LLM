@@ -34,7 +34,7 @@ export function DeleteConfirmationDialog({
         </h2>
         <p
           id="delete-dialog-description"
-          className="mt-2 text-white/80"
+          className="mt-2 text-white/80 whitespace-pre-line"
         >
           {prompt || "Are you sure you want to delete this letter? This action cannot be undone."}
         </p>
