@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Request, HTTPException
 from app.dependencies import get_current_user
 from app.services.db import get_supabase_client, get_service_client, verify_token, Client, User
-from app.services.gemini import generate_cover_letter, resume
+from app.services.gemini import generate_cover_letter
 from app.models.schemas.cover_letters import GenerateLetterRequest, CoverLetter, ModelResponse, datetime, uuid, Dict, Any
 import os
 
@@ -55,6 +55,11 @@ async def generate(
 
     # Generate Cover letter
     try:
+        # Get paresd resume if available
+        print("Fetching resume")
+        data = supabase.from_("resumes").select("*").eq("user_id", user_id).limit(1).execute().data
+        resume = data[0].get("parsed_data") if data and len(data) > 0 else None
+        print("Generating...")
         content: ModelResponse = await generate_cover_letter(
             model="gemini-2.5-flash",
             request=body,
@@ -73,6 +78,7 @@ async def generate(
             "salary": content.salary,
         }
 
+        print("Inserting record")
         res = supabase.table("jobs").insert(job).execute()
         job_id = res.data[0].get("id")
         # content = predict(request.job_title, request.job_description)
@@ -80,7 +86,7 @@ async def generate(
         data: CoverLetter = {
             "user_id": user_id,
             "job_id": job_id,
-            "content": content.description,
+            "content": content.cover_letter,
             "version": 1,
             "style": body.style,
             "length": body.length,

@@ -47,9 +47,9 @@ json_config = types.GenerateContentConfig(
     temperature=0.7,
     top_p=1,
     top_k=32,
-    max_output_tokens=3000,
+    max_output_tokens=10000,
     safety_settings=safety_settings,
-    response_mime_type="application/json",
+    # response_mime_type="application/json",
 )
 
 def initialize_model(api_key=API_KEY, **kwargs):
@@ -66,6 +66,8 @@ async def generate(contents:str, model:str=model, config:types.GenerateContentCo
         contents=contents,
         config=config
     )
+    
+    print(f"Gemini response: {response}")
     return response.text
 
 
@@ -114,7 +116,7 @@ async def generate_cover_letter(model:str, request: GenerateLetterRequest, resum
         Input:
         - Job Title: {request.job_title}
         - Job Description: {request.job_description}
-        - Candidate Resume: {resume_text}
+        - Candidate Resume Details: {resume_text}
 
         Cover letter requirements:
         - Exactly 3 {request.length} paragraphs:
@@ -177,61 +179,7 @@ async def generate_cover_letter(model:str, request: GenerateLetterRequest, resum
     try:
         parsed = json.loads(response)
         validated = ModelResponse(**parsed) # Validate the response
-        return validated.model_dump()
+        # validated = validated.model_dump() # Convert back to dict
+        return validated
     except Exception as e:
         raise GeminiResponseError(f"Invalid response format: {str(e)}")
-
-resume = """
-Uyonoh Manasseh Turaki 
-Full-Stack | Python Developer | 
-Surveyor | GIS Analyst 
-turakiuyonoh@gmail.com 
-+2349034245797 
-U/Bulus, Kaduna, Nigeria 
-https://uyonoh.com 
-Professional Summary 
-Full stack developer, GIS and AI enthusiast with hands-on experience in geospatial analysis, map digitization, 
-and machine learning applications. Proficient in Python, TensorFlow, and QGIS, with a strong foundation in 
-surveying and geoinformatics. Passionate about leveraging technology to solve real-world challenges and 
-optimize geospatial solutions. 
-Skills 
-• GIS Tools: QGIS, ArcMap, ArcGIS Pro 
-• Programming Languages: Python, JavaScript, C 
-• Machine Learning Frameworks: TensorFlow, PyTorch, Scikit-learn 
-• Web Development: HTML, CSS, JavaScript, Django, jQuery, Express, React, Next.js 
-• Version Control: Git, GitHub 
-Soft Skills 
-• Strong analytical thinking and problem-solving skills 
-• Excellent communication and collaboration abilities 
-• Detail-oriented with a focus on data accuracy 
-Experience 
-Geospatial Data Analyst (Contract) 
-Datalord Technologies — Remote | February 2025 – March 2025 
-• Populated and validated building footprint attributes using ArcGIS Pro and Google Earth, ensuring 
-completeness and spatial accuracy across geospatial datasets. 
-• Digitized omitted buildings and corrected geometry errors to maintain topological integrity in 
-alignment with project standards. 
-• Reviewed and updated building attributes including name, address, type, and use based on POI 
-datasets and satellite imagery. 
-• Conducted address verification and spatial feature validation through Google Earth and field data 
-cross-referencing. 
-• Managed and delivered weekly targets of 10,000 cleaned and updated building footprints with 
-consistent attribute classification. 
-• Maintained daily reporting and adhered to project timelines in a hybrid work environment. 
-Tools & Technologies: ArcGIS Pro, Google Earth Pro, Shapefiles, GeoJSON, Geodatabases, KML. 
-Key Skills: GIS Data Editing, Attribute Management, Digitization, Spatial Accuracy, Remote Collaboration. 
-GIS Assistant 
-KANGIS (Kano Geographic Information Systems) (NYSC) — Fulltime | 2024 – 2025 
-• Executed GIS-based surveys. 
-• Developed geospatial maps that improved resource allocation for community planning. 
-Survey Intern 
-KADGIS (Kaduna Geographic Information Service) — Fulltime | Mar 2022 – Sep 2022 
-• Digitized high-quality maps using GIS tools. 
-• Conducted detailed field surveys, ensuring data accuracy for cadastral mapping. 
-• Established survey beacons and executed layout mapping to support urban planning projects. 
-Education 
-Bachelor of Technology in Surveying and Geoinformatics (2:1) 
-Federal University of Technology, Minna, Nigeria | 2017 – 2024 
-• Final Year Project: Assessment of building footprint extraction from low and high-resolution satellite 
-images using instance segmentation.
-"""
