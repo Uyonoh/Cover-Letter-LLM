@@ -150,6 +150,16 @@ function Profile() {
     }
     if (data2) setResumes([...resumes, data2[0]]);
     alert("Upload successful!");
+
+    // Kick off background parsing
+    console.log("Shceduling parsing");
+    apiFetch("/resumes/parse", {
+      method: "POST",
+      body: JSON.stringify({
+        user_id: userId,
+        storage_path: `${userId}/${file.name}`,
+      }),
+    }).catch((err) => console.error("Background parse failed:", err));
   }
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -193,6 +203,8 @@ function Profile() {
     // refresh UI
     setResumes(resumes.filter(r => r.storage_path !== selectedResume.storage_path));
     setSelectedResume(null);
+    // Bug: file is still selected on input, need to file file for onChange
+    // cant select file with same name for upload
   }
 
   async function handleDeleteAccount() {

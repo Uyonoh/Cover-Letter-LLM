@@ -43,12 +43,13 @@ safety_settings = [
     ),
 ]
 
-config = types.GenerateContentConfig(
+json_config = types.GenerateContentConfig(
     temperature=0.7,
     top_p=1,
     top_k=32,
-    max_output_tokens=10000,
-    safety_settings=safety_settings
+    max_output_tokens=3000,
+    safety_settings=safety_settings,
+    response_mime_type="application/json",
 )
 
 def initialize_model(api_key=API_KEY, **kwargs):
@@ -56,14 +57,56 @@ def initialize_model(api_key=API_KEY, **kwargs):
 
     return client
 
-
-async def generate_cover_letter(model:str, request: GenerateLetterRequest, resume_text:str, client:genai.Client=None):
+async def generate(contents:str, model:str=model, config:types.GenerateContentConfig=json_config, client:genai.Client=None):
     if client == None:
         client = initialize_model(API_KEY)
     
+    response = client.models.generate_content(
+        model=model,
+        contents=contents,
+        config=config
+    )
+    return response.text
+
+
+async def parse_resume(text: str, model:str=model) -> dict:
+    prompt = f"""
+    You are an expert resume parser.
+
+    Extract structured information from the following resume text:
+    {text}
+
+    Return a JSON object with:
+
+    - "skills": overall list of key skills across the entire resume
+    - "experience": a list of roles, each with:
+        - "title": job title
+        - "company": company name
+        - "duration": years or dates worked
+        - "highlights": 2–4 bullet points of key achievements or responsibilities
+        - "skills": list of skills specifically demonstrated in this role
+    - "education": a list of degrees, each with:
+        - "degree": name of degree or certification
+        - "institution": school or university
+        - "year": graduation or completion year
+
+    Only include information explicitly stated in the text. Do not infer or fabricate details.
+
+    Respond with only the JSON object. No explanation or commentary.
+    """
+
+    response = await generate(prompt, model=model)
+    print(f"{response=}")
+    parsed = json.loads(response)
+    # TODO: Validate the response here
+    return parsed
+
+
+
+async def generate_cover_letter(model:str, request: GenerateLetterRequest, resume_text:str, client:genai.Client=None):
     if "creative" in request.modifiers:
-        config.temperature = 0.9
-        config.top_p = 0.95
+        json_config.temperature = 0.9
+        json_config.top_p = 0.95
 
     prompt = f"""
         You are a professional career assistant. Your task is to generate a personalized, engaging, and concise cover letter tailored to the job description and candidate resume provided below. 
@@ -124,15 +167,16 @@ async def generate_cover_letter(model:str, request: GenerateLetterRequest, resum
         }}
     """
 
-    response = client.models.generate_content(
+    response = await generate(
         model=model,
         contents=prompt,
-        config=config
+        config=json_config,
+        client=client
     )
     
     try:
-        parsed = json.loads(response.text)
-        validated = ModelResponse(**parsed)
+        parsed = json.loads(response)
+        validated = ModelResponse(**parsed) # Validate the response
         return validated.model_dump()
     except Exception as e:
         raise GeminiResponseError(f"Invalid response format: {str(e)}")

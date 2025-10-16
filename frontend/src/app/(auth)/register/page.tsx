@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { apiFetch } from "@/utils/api";
 import Loading from "@/components/Loading";
-import { useAuth } from "@/app/hooks/useAuth"
+import { useAuth } from "@/hooks/useAuth"
 
 function Register() {
     const [isLoading, setIsLoading] = useState(false);

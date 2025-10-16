@@ -79,7 +79,7 @@ function Generate() {
                             type="text"
                             name="job-title"
                             id="job-title"
-                            placeholder="Enter the Job Title"
+                            placeholder="Enter Job Title (Optional)"
                             className="bg-secondary/10 text-white border border-secondary rounded-lg py-2 px-4 max-w-[500px]
                          focus:border-primary focus:ring-0 focus:outline-none text-lg"
                             value={jobTitle}

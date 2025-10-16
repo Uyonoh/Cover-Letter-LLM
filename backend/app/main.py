@@ -2,7 +2,7 @@ from fastapi import FastAPI
 import os
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import letters, auth
+from app.routes import letters, auth, resumes
 
 load_dotenv()
 app = FastAPI()
@@ -48,3 +48,4 @@ async def protected_route(
 # Include routers
 app.include_router(auth.router)
 app.include_router(letters.router)
+app.include_router(resumes.router)
