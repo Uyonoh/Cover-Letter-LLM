@@ -23,6 +23,12 @@ class GenerateLetterRequest(BaseModel):
     length: str
     modifiers: list[str]
 
+class ModifyLetterRequest(BaseModel):
+    job_title: str
+    letter: str
+    prompt: str
+
+
 class ListLetterResponse(BaseModel):
   id: str
   jobs: Job

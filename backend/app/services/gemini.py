@@ -10,7 +10,7 @@ from google import genai
 from google.genai import types
 from dotenv import load_dotenv
 
-from app.models.schemas.cover_letters import GenerateLetterRequest, ModelResponse
+from app.models.schemas.cover_letters import GenerateLetterRequest, ModifyLetterRequest, ModelResponse
 
 load_dotenv()
 
@@ -49,7 +49,15 @@ json_config = types.GenerateContentConfig(
     top_k=32,
     max_output_tokens=10000,
     safety_settings=safety_settings,
-    # response_mime_type="application/json",
+    response_mime_type="application/json",
+)
+
+text_config = types.GenerateContentConfig(
+    temperature=0.7,
+    top_p=1,
+    top_k=32,
+    max_output_tokens=10000,
+    safety_settings=safety_settings,
 )
 
 def initialize_model(api_key=API_KEY, **kwargs):
@@ -181,5 +189,44 @@ async def generate_cover_letter(model:str, request: GenerateLetterRequest, resum
         validated = ModelResponse(**parsed) # Validate the response
         # validated = validated.model_dump() # Convert back to dict
         return validated
+    except Exception as e:
+        raise GeminiResponseError(f"Invalid response format: {str(e)}")
+
+
+async def modify_cover_letter(model:str, request:ModifyLetterRequest, client:genai.Client=None):
+    
+    prompt = f"""
+    You are a professional writing assistant specialized in job application materials. 
+    Your task is to refine or modify an existing cover letter based strictly on:
+    1. The original cover letter text,
+    2. The specified job title, and
+    3. The user’s message or request.
+
+    Follow these principles:
+    - Do NOT invent or assume any information not found in the letter or provided by the user.
+    - Maintain the user’s tone and voice unless the user explicitly asks to change it.
+    - Ensure the letter fits the target job title naturally.
+    - Improve clarity, grammar, and flow while preserving meaning.
+    - Make the result professional, concise, and compelling.
+    - Avoid redundancy and unnecessary adjectives.
+    - Do not include instructions or commentary in your output — only the final revised letter.
+
+    Input details:
+    COVER LETTER: {request.letter}
+    JOB TITLE: {request.job_title}
+    USER MESSAGE: {request.prompt}
+
+    Output format:
+        Respond with **only the revised cover letter** (no Markdown code fences, no extra commentary).
+    """
+     
+    try:
+        response = await generate(
+            model=model,
+            contents=prompt,
+            config=text_config,
+            client=client
+        )
+        return response
     except Exception as e:
         raise GeminiResponseError(f"Invalid response format: {str(e)}")

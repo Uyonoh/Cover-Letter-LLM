@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, Request, HTTPException
+from fastapi.responses import JSONResponse
 from app.dependencies import get_current_user
 from app.services.db import get_supabase_client, get_service_client, verify_token, Client, User
-from app.services.gemini import generate_cover_letter
-from app.models.schemas.cover_letters import GenerateLetterRequest, CoverLetter, ModelResponse, datetime, uuid, Dict, Any
+from app.services.gemini import generate_cover_letter, modify_cover_letter
+from app.models.schemas.cover_letters import GenerateLetterRequest, ModifyLetterRequest, CoverLetter, ModelResponse, datetime, uuid, Dict, Any
 import os
 
 ENV = os.getenv("ENV", "dev")
@@ -127,3 +128,21 @@ async def view(
     print(f"View Response = {res}")
     
     return {"letter": res.data[0]}
+
+@router.post("/modify")
+async def modify_letter(
+    payload: ModifyLetterRequest,
+    user: Dict[str, Any]=Depends(get_current_user),
+):
+    
+    try:
+        cover_letter = await modify_cover_letter(
+            model="gemini-2.5-flash",
+            request=payload,
+        )
+        
+        return JSONResponse({"ok": True, "letter": cover_letter})
+    
+    except Exception as e:
+        print(f"Exception: {e}")
+        return JSONResponse({"ok": False, "error": str(e)}, status_code=500)

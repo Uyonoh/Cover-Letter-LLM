@@ -13,12 +13,16 @@ function View() {
   const [jobTitle, setJobTitle] = useState("");
   const [jobId, setJobId] = useState("");
   const [letter, setLetter] = useState("");
+  const [oldLetter, setOldLetter] = useState("");
   const [prompt, setPrompt] = useState("");
   const [prompts, setPrompts] = useState<string[]>([]);
   const max_prompt_length = 150;
 
   const { id } = useParams<{ id: string }>();
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isRegenerating, setIsRegenerating] = useState(false);
+  const [isModifying, setIsModifying] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -33,7 +37,7 @@ function View() {
         setJobTitle(data.letter?.jobs?.title ?? "");
         setJobId(data.letter?.job_id ?? "");
         setLetter(data.letter?.content ?? "");
-        
+        setOldLetter(data.letter?.content ?? "");
       })
       .catch((err) => {
         console.error("Fetch error:", err);
@@ -67,7 +71,7 @@ function View() {
     const prompts = shuffled.slice(0, n);
 
     setPrompts(prompts);
-  }, []);
+  }, [oldLetter]);
 
   async function handleRegenerate() {
     try {
@@ -90,43 +94,38 @@ function View() {
     }
   }
 
-  // async function handleSubmit(e: React.FormEvent) {
-  //     e.preventDefault();
-  //     setIsLoading(true);
+  async function handleModify() {
 
-  //     try {
-  //         const res = await apiFetch(`/letters/${id}`, {
-  //             method: "PUT",
-  //             headers: { "Content-Type": "application/json" },
-  //             body: JSON.stringify({
-  //                 jobTitle,
-  //                 content: letter,
-  //                 style,
-  //                 length,
-  //                 modifiers: Object.keys(modifiers).filter(
-  //                     (key) => modifiers[key as keyof typeof modifiers]
-  //                 ),
-  //             }),
-  //         });
+    try {
+      setIsModifying(true);
+      const payload = {
+        letter: letter,
+        job_title: jobTitle,
+        prompt: prompt
+      };
+      const response = await apiFetch("/letters/modify", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
 
-  //         if (!res.ok) {
-  //             throw new Error(await res.text());
-  //         }
-
-  //         const data = await res.json();
-  //         console.log("Letter saved:", data);
-  //         alert("Letter saved successfully!");
-  //     } catch (err) {
-  //         console.error("Save failed:", err);
-  //         alert("Could not save letter.");
-  //     } finally {
-  //         setIsLoading(false);
-  //     }
-  // }
+      if (!response.ok) {
+        alert("Failed to modify Letter!");
+        return;
+      }
+      alert("Modified!");
+      const data = await response.json()
+      setLetter(data.letter);
+    } catch (err: unknown) {
+      console.error("Modify failed:", err);
+      alert("Could not modify letter.");
+    } finally {
+      setIsModifying(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setIsLoading(true);
+    setIsSaving(true);
 
     try {
       const { error } = await supabase
@@ -145,12 +144,12 @@ function View() {
 
       if (jobErr) throw jobErr;
 
-      alert("Letter saved successfully!");
+      setOldLetter(letter);
     } catch (err) {
       console.error("Save failed:", err);
       alert("Could not save letter.");
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
     }
   }
 
@@ -219,7 +218,8 @@ function View() {
 
                 <button
                   type="submit"
-                  className="rounded-lg px-4 py-2 bg-primary text-white hover:bg-primary/90 cursor-pointer"
+                  disabled={oldLetter === letter}
+                  className="rounded-lg px-4 py-2 bg-primary text-white hover:bg-primary/90 cursor-pointer disabled:bg-gray-500 disabled:text-white"
                 >
                   Save
                 </button>
@@ -254,7 +254,7 @@ function View() {
               {/* Send button */}
               <span
                 className="rounded-full flex items-center justify-center cursor-pointer"
-                // onClick={handleSendMessage} // define this function
+                onClick={handleModify} // define this function
               >
                 <SendHorizonal
                   size={24}
@@ -294,13 +294,31 @@ function View() {
 
           <button
             type="submit"
-            className="rounded-lg px-4 py-2 bg-primary text-white hover:bg-primary/90 cursor-pointer"
+            disabled={oldLetter === letter}
+            className="rounded-lg px-4 py-2 bg-primary text-white hover:bg-primary/90 cursor-pointer disabled:bg-gray-500 disabled:text-white"
           >
             Save
           </button>
         </div>
         {/* <button type="submit" className="rounded-lg p-2 sm:hidden bg-primary w-full my-7 cursor-pointer">Generate Cover Letter</button> */}
       </form>
+
+      <Loading isLoading={isModifying} overlay messages={[
+        "Parsing Prompt",
+        "Anallyzing letter",
+        "Making appropriate changes",
+        "Just a moment",
+      ]} />
+      <Loading isLoading={isRegenerating} overlay messages={[
+        "Validating your letter",
+        "Making changes",
+        "Just a moment",
+      ]} />
+      <Loading isLoading={isSaving} overlay messages={[
+        "Validating your letter",
+        "Sending to database",
+        "Just a moment",
+      ]} />
     </div>
   );
 }
