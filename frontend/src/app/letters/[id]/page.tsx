@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { apiFetch } from "@/utils/api";
 import { supabase } from "@/utils/supabaseClient";
+import { SendHorizonal } from "lucide-react";
 import Loading from "@/components/Loading";
 import DeleteButton from "@/components/DeleteButton";
 import type { LetterView } from "@/types/letters";
@@ -12,18 +13,9 @@ function View() {
   const [jobTitle, setJobTitle] = useState("");
   const [jobId, setJobId] = useState("");
   const [letter, setLetter] = useState("");
-
-  const [style, setStyle] = useState<"professional" | "casual" | "creative">(
-    "professional"
-  );
-  const [length, setLength] = useState<"concise" | "standard" | "detailed">(
-    "standard"
-  );
-  const [modifiers, setModifiers] = useState({
-    leadership: false,
-    technical: false,
-    problemSolving: false,
-  });
+  const [prompt, setPrompt] = useState("");
+  const [prompts, setPrompts] = useState<string[]>([]);
+  const max_prompt_length = 150;
 
   const { id } = useParams<{ id: string }>();
   const [isLoading, setIsLoading] = useState(true);
@@ -41,16 +33,7 @@ function View() {
         setJobTitle(data.letter?.jobs?.title ?? "");
         setJobId(data.letter?.job_id ?? "");
         setLetter(data.letter?.content ?? "");
-
-        // Pre-populate customization
-        setStyle(data.letter?.style ?? "professional");
-        setLength(data.letter?.length ?? "standard");
-        setModifiers({
-          leadership: data.letter?.modifiers?.includes("leadership") ?? false,
-          technical: data.letter?.modifiers?.includes("technical") ?? false,
-          problemSolving:
-            data.letter?.modifiers?.includes("problemSolving") ?? false,
-        });
+        
       })
       .catch((err) => {
         console.error("Fetch error:", err);
@@ -59,6 +42,33 @@ function View() {
       .finally(() => setIsLoading(false));
   }, [id]);
 
+  function handleSetPrompt (newPrompt: string) {
+    if (newPrompt.length <= max_prompt_length) {
+      setPrompt(newPrompt);
+    }}
+
+  useEffect(() => {
+    const popularPrompts = [
+      "Revise this letter to sound more appropriate for a senior role",
+      "Recast this as approachable and conversational - like someone you'd want on your team",
+      "Replace passive phrasing with active statements that project authority",
+      "Make this sound more collaborative, not boastful",
+      "Integrate metrics to show tangible outcomes where possible",
+      "Refine the middle paragraphs to showcase niche exxpertise and distinctive skills",
+      "Reshape the opening to immediately capture attention",
+      "Reorganize this to tell a smother story",
+      "Rewrite the last paragraph to convey genuine excitement and innitiative",
+      "Add a concise anecdote that illustrates problem-solving skills or passion",
+      "Make it clear that I'm already fluent in this industry",
+    ]
+    // Only use n random prompts
+    const n = 3;
+    const shuffled = popularPrompts.sort(() => 0.5 - Math.random());
+    const prompts = shuffled.slice(0, n);
+
+    setPrompts(prompts);
+  }, []);
+
   async function handleRegenerate() {
     try {
       setIsLoading(true);
@@ -66,11 +76,6 @@ function View() {
         method: "POST",
         body: JSON.stringify({
           jobTitle,
-          style,
-          length,
-          modifiers: Object.keys(modifiers).filter(
-            (key) => modifiers[key as keyof typeof modifiers]
-          ),
         }),
       });
 
@@ -128,11 +133,6 @@ function View() {
         .from("cover_letters")
         .update({
           content: letter,
-          style,
-          length,
-          modifiers: Object.keys(modifiers).filter(
-            (key) => modifiers[key as keyof typeof modifiers]
-          ),
         })
         .eq("id", id);
 
@@ -230,147 +230,58 @@ function View() {
 
         {/* Right on larger screens, wrap under on small screen */}
         <div className="custumization  sm:col-span-3 sm:pl-5 flex flex-col gap-7">
-          <h3 className="font-bold text-xl text-white pt-2">Customization</h3>
-          {/* Letter Style */}
-          <div className="flex flex-col gap-3">
-            <p>Cover Letter Style</p>
-            <div className="flex flex-wrap gap-3">
-              <label className="flex-1 min-w-[100px]">
-                <input
-                  className="sr-only peer"
-                  name="cover-letter-style"
-                  type="radio"
-                  value="professional"
-                  checked={style === "professional"}
-                  onChange={() => setStyle("professional")}
+          <h3 className="font-bold text-xl text-white pt-2">Customize Your Letter</h3>
+          
+          {/* Custom prompt text area */}
+          <div className="relative w-full">
+            <textarea
+              name="prompt"
+              id="prompt"
+              value={prompt}
+              placeholder="Tweak the tone, adjust the details, or shuffle the content of this cover letter"
+              maxLength={500} // set your character limit here
+              className="text-white w-full h-50 sm:h-65  border border-secondary rounded-sm p-3 pb-12
+                        focus:border-primary focus:ring-0 focus:outline-none resize-none"
+              onChange={(e) => handleSetPrompt(e.target.value)}
+            ></textarea>
+
+            <div className="absolute bottom-3 w-full flex items-center justify-between h-10 px-2">
+              {/* Character count */}
+              <div className={`text-sm ` + (prompt.length >= max_prompt_length ? "text-red-500" : "text-white/70")}>
+                {prompt.length}/{max_prompt_length}
+              </div>
+
+              {/* Send button */}
+              <span
+                className="rounded-full flex items-center justify-center cursor-pointer"
+                // onClick={handleSendMessage} // define this function
+              >
+                <SendHorizonal
+                  size={24}
+                  className="text-white/80 hover:text-primary"
                 />
-                <div className="cursor-pointer text-center text-sm font-medium py-2 px-3 rounded-lg border border-secondary dark:border-gray-700 peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary transition-colors">
-                  Professional
-                </div>
-              </label>
-              <label className="flex-1 min-w-[100px]">
-                <input
-                  className="sr-only peer"
-                  name="cover-letter-style"
-                  type="radio"
-                  value="casual"
-                  checked={style === "casual"}
-                  onChange={() => setStyle("casual")}
-                />
-                <div className="cursor-pointer text-center text-sm font-medium py-2 px-3 rounded-lg border border-secondary dark:border-gray-700 peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary transition-colors">
-                  Casual
-                </div>
-              </label>
-              <label className="flex-1 w-full min-w-[100px] ">
-                <input
-                  className="sr-only peer"
-                  name="cover-letter-style"
-                  type="radio"
-                  value="creative"
-                  checked={style === "creative"}
-                  onChange={() => setStyle("creative")}
-                />
-                <div className="cursor-pointer text-center text-sm font-medium py-2 px-3 rounded-lg border border-secondary dark:border-gray-700 peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary transition-colors">
-                  Creative
-                </div>
-              </label>
+              </span>
             </div>
           </div>
 
-          {/* Length */}
-          <div className="flex flex-col gap-3">
-            <p>Length</p>
-            <div className="flex flex-wrap gap-3">
-              <label className="flex-1 min-w-[80px]">
-                <input
-                  className="sr-only peer"
-                  name="cover-letter-length"
-                  type="radio"
-                  value="concise"
-                  checked={length === "concise"}
-                  onChange={() => setLength("concise")}
-                />
-                <div className="cursor-pointer text-center text-sm font-medium py-2 px-3 rounded-lg border border-secondary dark:border-gray-700 peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary transition-colors">
-                  Concise
-                </div>
-              </label>
-              <label className="flex-1 min-w-[80px]">
-                <input
-                  className="sr-only peer"
-                  name="cover-letter-length"
-                  type="radio"
-                  value="standard"
-                  checked={length === "standard"}
-                  onChange={() => setLength("standard")}
-                />
-                <div className="cursor-pointer text-center text-sm font-medium py-2 px-3 rounded-lg border border-secondary dark:border-gray-700 peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary transition-colors">
-                  Standard
-                </div>
-              </label>
-              <label className="flex-1 min-w-[80px]">
-                <input
-                  className="sr-only peer"
-                  name="cover-letter-length"
-                  type="radio"
-                  value="detailed"
-                  checked={length === "detailed"}
-                  onChange={() => setLength("detailed")}
-                />
-                <div className="cursor-pointer text-center text-sm font-medium py-2 px-3 rounded-lg border border-secondary dark:border-gray-700 peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary transition-colors">
-                  Detailed
-                </div>
-              </label>
-            </div>
-          </div>
 
-          {/* modifiers */}
+
+          {/* Suggestions */}
           <div className="flex flex-col gap-3">
-            <p>Modifiers</p>
-            <div className="flex flex-col gap-2">
-              <div className="flex gap-3">
-                <input
-                  type="checkbox"
-                  name="leadership"
-                  id="leadership"
-                  checked={modifiers.leadership}
-                  onChange={(e) =>
-                    setModifiers({ ...modifiers, leadership: e.target.checked })
-                  }
-                />
-                <label htmlFor="leadership">Highlight Leadership Skills</label>
-              </div>
-              <div className="flex gap-3">
-                <input
-                  type="checkbox"
-                  name="technical"
-                  id="technical"
-                  checked={modifiers.technical}
-                  onChange={(e) =>
-                    setModifiers({ ...modifiers, technical: e.target.checked })
-                  }
-                />
-                <label htmlFor="technical">Emphasize Technical Expertise</label>
-              </div>
-              <div className="flex gap-3">
-                <input
-                  type="checkbox"
-                  name="problem-solving"
-                  id="problem-solving"
-                  checked={modifiers.problemSolving}
-                  onChange={(e) =>
-                    setModifiers({
-                      ...modifiers,
-                      problemSolving: e.target.checked,
-                    })
-                  }
-                />
-                <label htmlFor="problem-solving">
-                  Showcase Problem-Solving Skills
-                </label>
-              </div>
+            <p>Popular Fixes</p>
+            <div className="flex flex-wrap gap-3">
+                {prompts.map((p, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setPrompt(p)}
+                  className="rounded-lg px-3 py-1 border border-secondary text-sm hover:bg-gray-700 cursor-pointer">
+                  {p}
+                </button>
+                ))}
             </div>
           </div>
-          {/* TODO: Add custom prompt text area */}
+              
         </div>
         <div className="flex sm:hidden gap-3 justify-between my-7">
           <button
