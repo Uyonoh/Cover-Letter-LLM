@@ -74,13 +74,14 @@ function View() {
   }, [oldLetter]);
 
   async function handleRegenerate() {
+    // TODO: Add selection of various modifiers
     try {
-      setIsLoading(true);
+      setIsRegenerating(true);
       const res = await apiFetch(`/letters/${id}/regenerate`, {
         method: "POST",
-        body: JSON.stringify({
-          jobTitle,
-        }),
+        // body: JSON.stringify({
+        //   jobTitle,
+        // }),
       });
 
       if (!res.ok) throw new Error(await res.text());
@@ -90,7 +91,7 @@ function View() {
       console.error("Regenerate failed:", err);
       alert("Could not regenerate letter.");
     } finally {
-      setIsLoading(false);
+      setIsRegenerating(false);
     }
   }
 
@@ -153,6 +154,18 @@ function View() {
     }
   }
 
+  async function handleDeleteJob() {
+    // Check if that job still has letters
+    const { count } = await supabase
+      .from('letters')
+      .select('id', { count: 'exact', head: true })
+      .eq('job_id', jobId);
+
+    if (count === 0) {
+      await supabase.from('jobs').delete().eq('id', jobId);
+    }
+  }
+
   if (isLoading) {
     return (
       <Loading isLoading={isLoading} messages={[
@@ -195,6 +208,7 @@ function View() {
                 table="cover_letters"
                 text=""
                 aria-label="Delete this letter"
+                onDeleted={handleDeleteJob}
               />
             </div>
             <textarea

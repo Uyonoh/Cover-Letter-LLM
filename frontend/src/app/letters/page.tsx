@@ -38,7 +38,7 @@ function Letters() {
       }
     };
     loadLetters();
-  });
+  }, []);
 
   // Filter by job title or company
   const filtered = letters.filter((l) =>

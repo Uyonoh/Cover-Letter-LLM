@@ -102,6 +102,71 @@ async def generate(
     except Exception as e:
         return HTTPException(status_code=500, detail=str(e))
 
+
+@router.post("/{letter_id}/regenerate")
+async def regenerate(
+    request: Request,
+    letter_id,
+    user: Dict[str, Any]=Depends(get_current_user),
+    supabase: Client=Depends(get_supabase_client),
+):
+    
+    if ENV == "dev":
+        auth = request.headers.get("authorization")
+        if auth and auth.startswith("Bearer "):
+            token = auth.split(" ")[1]
+        supabase.postgrest.auth(token)
+
+    # Generate Cover letter
+    try:
+        user_id: str = user["sub"]
+
+        # Fetch previous letter details
+        response = (
+            supabase.table("cover_letters")
+            .select("style, length, modifiers, jobs(*)")
+            .eq("user_id", user_id)
+            .eq("id", letter_id)
+            .order("created_at", desc=True)
+            .execute()
+        )
+        response = response.data[0]
+        job_id = response["jobs"]["id"]
+
+        # Create structured letter request
+        payload = GenerateLetterRequest(
+            job_title=response["jobs"]["title"],
+            job_description=response["jobs"]["description"],
+            style=response["style"],
+            length=response["length"],
+            modifiers=response["modifiers"]
+        )
+        
+        # Get paresd resume if available
+        data = supabase.from_("resumes").select("*").eq("user_id", user_id).limit(1).execute().data
+        resume = data[0].get("parsed_data") if data and len(data) > 0 else None
+
+        # Call gemini to generate letter
+        content: ModelResponse = await generate_cover_letter(
+            model="gemini-2.5-flash",
+            request=payload,
+            resume_text=resume,
+        )
+
+        data: CoverLetter = {
+            "content": content.cover_letter,
+            # "version": 1,
+        }
+
+        # # Save generated letter (if not handled in frontend)
+        # supabase.table("cover_letters").update(data).eq("job_id", job_id).execute()
+
+        return {"generatedLetter": content.cover_letter}
+
+    except Exception as e:
+        return JSONResponse({"message": str(e)}, status_code=500)
+
+
 @router.get("/{letter_id}")
 async def view(
     request: Request,
@@ -146,3 +211,4 @@ async def modify_letter(
     except Exception as e:
         print(f"Exception: {e}")
         return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
+

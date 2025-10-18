@@ -11,16 +11,30 @@ interface DeleteProps {
   table: string;
   text?: string;
   redirectTo?: string; // optional redirect path
-  onDeleted?: () => void;
+  prepDelete?: () => void; // Before deleting
+  onDeleted?: () => void; // After deleting
+  asyncPrep?: boolean; // Make prep async
 }
 
-export default function DeleteButton({ table, id, text, onDeleted, redirectTo = "/letters" }: DeleteProps) {
+export default function DeleteButton({ table, id, text, asyncPrep, prepDelete, onDeleted, redirectTo = "/letters" }: DeleteProps) {
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  async function awaitPrep(){
+    if (prepDelete) prepDelete();
+  }
+
   async function handleDelete() {
     setLoading(true);
+    
+    if (prepDelete) {
+      if (asyncPrep){
+        await awaitPrep();
+      } else {
+        prepDelete();
+      }
+    }
 
     const { status, statusText } = await supabase
       .from(table)

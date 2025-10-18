@@ -75,7 +75,7 @@ async def generate(contents:str, model:str=model, config:types.GenerateContentCo
         config=config
     )
     
-    print(f"Gemini response: {response}")
+    # print(f"Gemini response: {response}")
     return response.text
 
 
@@ -106,7 +106,7 @@ async def parse_resume(text: str, model:str=model) -> dict:
     """
 
     response = await generate(prompt, model=model)
-    print(f"{response=}")
+    # print(f"{response=}")
     parsed = json.loads(response)
     # TODO: Validate the response here
     return parsed
