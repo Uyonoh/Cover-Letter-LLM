@@ -96,14 +96,14 @@ function Generate() {
                             onChange={(e) => setJobDescription(e.target.value)}
                         />
 
-                        <div className="flex justify-center sm:justify-between items-center">
-                            <button
+                        <div className="flex justify-center sm:justify-end items-center">
+                            {/* <button
                                 type="button"
                                 className="flex gap-2 items-center rounded-lg px-4 py-2 border border-secondary cursor-pointer hover:bg-gray-700"
                             >
                                 <Paperclip size={18} />
                                 Upload File
-                            </button>
+                            </button> */}
                             <button
                                 type="submit"
                                 className="rounded-lg px-4 py-2 hidden sm:block bg-primary cursor-pointer text-white hover:bg-primary/90 transition-colors"
