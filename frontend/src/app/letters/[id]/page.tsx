@@ -300,7 +300,7 @@ function View() {
         <div className="flex sm:hidden gap-3 justify-between my-7">
           <button
             type="button"
-            className="rounded-lg px-4 py-2 border border-primary text-white hover:bg-background-light cursor-pointer"
+            className="rounded-lg px-4 py-2 border border-secondary text-white hover:bg-background-light cursor-pointer"
             onClick={handleRegenerate}
           >
             Regenerate
