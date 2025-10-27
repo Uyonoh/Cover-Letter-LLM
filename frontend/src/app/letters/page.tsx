@@ -153,7 +153,7 @@ function Letters() {
                   <td className="px-4 py-3">
                     {new Date(letter.created_at).toLocaleDateString()}
                   </td>
-                  <td className="px-4 py-3 text-sm flex gap-4">
+                  <td className="px-4 py-3 text-sm flex gap-4 items-center">
                     <Link
                       aria-label="Edit letter"
                       className="hover:underline hover:text-primary flex gap-2 items-center cursor-pointer"
