@@ -41,7 +41,7 @@ function AuthLayout(
                     <span>Or continue with</span>
                     <div className="h-[1px] border border-secondary"></div>
                 </span>
-                <div className="flex gap-4 w-full">
+                <div className="flex gap-4 w-full px-2">
                     <button
                         className=" flex justify-center items-center gap-1 rounded-lg text-white p-2 w-full cursor-pointer bg-[#0d151c] border border-secondary"
                         onClick={(e) => SignInWIthGoogle()}

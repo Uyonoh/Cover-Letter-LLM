@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import Loading from "@/components/Loading";
+import ForgotPassword from "@/components/ForgotPassword";
 
 
 
@@ -12,6 +13,7 @@ function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [forgotPassword, setForgotPassword] = useState(false);
     const [err, setErr] = useState("");
     const {session, signIn, signUp, signOut} = useAuth();
     const router = useRouter();
@@ -41,6 +43,7 @@ function Login() {
         }
     }
 
+
     return (
         <form action="" className="form-container flex flex-col justify-center items-between gap-5">
             <div className="text-center">
@@ -59,18 +62,23 @@ function Login() {
                     <input type="password" name="password" id="password" placeholder="Password" className="w-full p-2 form-input"
                      onChange={(e) => setPassword(e.target.value)}/>
                 </div>
-                <div className="remember-forgot flex justify-between">
+                <div className="remember-forgot sm:flex justify-between">
                     <div className="relative flex gap-2">
                         <input type="checkbox" name="remember" id="remember"
                             className=""/>
                         <label htmlFor="remember">Remember me</label>
                     </div>
-                    <Link href="/forgot-password" className="text-blue-600">Forgot your password?</Link>
+                    <div className="hidden justify-end sm:block">
+                        <span className="text-blue-600 cursor-pointer" onClick={() => setForgotPassword(true)}>Forgot your password?</span>
+                    </div>
                 </div>
                 <button type="submit"
                     className="rounded-lg text-white p-2 bg-primary w-full cursor-pointer"
                     onClick={handleLogin}
                 >Sign In</button>
+                <div className="flex justify-center sm:hidden">
+                        <span className="text-blue-600" onClick={() => setForgotPassword(true)}>Forgot your password?</span>
+                </div>
             </div>
 
             <Loading isLoading={isLoading} messages={[
@@ -78,6 +86,8 @@ function Login() {
                 "Verifying Your Identity",
                 "Syncing your data",
                 ]} overlay />
+            
+            <ForgotPassword isOpen={forgotPassword} onCancel={() => setForgotPassword(false)} />
         </form>
     );
 }
