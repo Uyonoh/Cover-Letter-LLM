@@ -12,6 +12,7 @@ export default function ForgotPassword({ isOpen, onCancel }: Props) {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
+  const appRoot = process.env.NEXT_PUBLIC_APP_URL!.toString()
 
   // Allow escape key to close modal
   useEffect(() => {
@@ -33,7 +34,7 @@ export default function ForgotPassword({ isOpen, onCancel }: Props) {
     setMessage("");
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: "http://localhost:3000/password/reset",
+      redirectTo: `${appRoot}/password/reset`,
     });
 
     if (error) {
