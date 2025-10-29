@@ -29,7 +29,7 @@ function Register() {
     setErr("");
 
     if (!matchPassword()) {
-      setErr("Passwords must match! Please comfirm your password.");
+      setErr("Passwords must match! Please confirm your password.");
       return;
     }
 

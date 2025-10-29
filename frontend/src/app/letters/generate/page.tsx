@@ -1,15 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/utils/supabaseClient";
 import { Paperclip } from "lucide-react";
 import { apiFetch } from "@/utils/api";
 import Loading from "@/components/Loading";
+import { ToLogin } from "@/components/ToLogin";
 
 function Generate() {
     const [jobTitle, setJobTitle] = useState("");
     const [jobDescription, setJobDescription] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [isAuth, setIsAuth] = useState(false);
 
     // Customization state
     const [style, setStyle] = useState<"professional" | "casual" | "creative">("professional");
@@ -21,6 +24,15 @@ function Generate() {
     });
 
     const router = useRouter();
+
+    useEffect(() => {
+        async function getAuth() {
+            const {data: { session }, error} = await supabase.auth.getSession();
+            const user = session?.user;
+            setIsAuth(!!user);
+        }
+        getAuth();
+    }, [router]);
 
     async function handleGenerateLetter(e: React.FormEvent) {
         e.preventDefault();
@@ -287,6 +299,7 @@ function Generate() {
                 overlay
                 delay={3500}
             />
+            {!isAuth && <ToLogin />}
         </div>
     );
 }
