@@ -23,7 +23,7 @@ function Login() {
         e.preventDefault();
         setErr("");
         setIsLoading(true);
-        const next = searchParams?.get("next") || "/";
+        const next = searchParams?.get("next") || "/letters";
 
         try {
             const { session, error } =  await signIn(

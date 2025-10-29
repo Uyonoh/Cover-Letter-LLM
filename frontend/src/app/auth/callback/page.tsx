@@ -2,15 +2,17 @@
 'use client'
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/utils/supabaseClient';
 import { apiFetch } from '@/utils/api';
 import Loading from '@/components/Loading';
 
 export default function AuthCallback() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
+    const next = searchParams?.get("next") || "/letters";
     const syncSession = async () => {
       const { data: { session } } = await supabase.auth.getSession()
       if (session?.access_token) {
@@ -35,7 +37,8 @@ export default function AuthCallback() {
         if (!profile?.first_name || !profile?.last_name) {
           router.replace('/profile/complete')
         } else {
-          router.push('/letters')
+          console.log("Pushing from callback to ", next);
+          router.push(next)
         }
 
       } else {

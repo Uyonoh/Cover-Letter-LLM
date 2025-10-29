@@ -23,7 +23,14 @@ function Generate() {
         problemSolving: false,
     });
 
-    const router = useRouter();
+    // Set authorization
+      const router = useRouter();
+      const next = `/letters/generate`
+      useEffect(() => {
+        supabase.auth.getSession().then(({ data }) => {
+          if (!data.session) router.push(`/login?next=${next}`);
+        });
+      }, []);
 
     useEffect(() => {
         async function getAuth() {

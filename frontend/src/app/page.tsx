@@ -2,10 +2,25 @@
 
 import "@/styles/index.css";
 import { Clock, FilePenLine, TrendingUp } from "lucide-react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import AuthPromptModal from "@/components/AuthPromptModal";
+import { useAuth } from "@/hooks/useAuth";
 
 function Home() {
+  const [modalOpen, setModalOpen] = useState(false);
   const router = useRouter();
+  const { session } = useAuth();
+  const user = session?.user;
+
+  const handleGenerateClick = () => {
+    if (user) {
+      router.push("/letters/generate");
+    } else {
+      setModalOpen(true);
+    }
+  };
+
   return(
     <div className="py-5 px-5 sm:px-7 md:px-10">
       <div className="hero flex justify-center align-center min-h-[480px] sm:min-h-[560px]
@@ -18,8 +33,8 @@ function Home() {
             </p>
             <button className="px-6 py-3 min-w-[84px] max-w-[480px] bg-[#0d7ff2] rounded-xl truncate text-base font-bold
               cursor-pointer hover:bg-primary/90 transition-all duration-300 transform hover:scale-105"
-              onClick={(e) => router.push("/letters/generate")}>
-              Generate Your First Cover Letter
+              onClick={(e) => handleGenerateClick()}>
+              Get Started on Your Letter
             </button>
           </div>
       </div>
@@ -59,6 +74,7 @@ function Home() {
           </div>
         </div>
       </section>
+      <AuthPromptModal open={modalOpen} onClose={() => setModalOpen(false)} />
     </div>
   );
 }

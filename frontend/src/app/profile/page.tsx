@@ -25,7 +25,10 @@ function Profile() {
 
   const [isDeleteUserDialogOpen, setIsDeleteUserDialogOpen] = useState(false);
   const [isDeletingUser, setIsDeletingUser] = useState(false);
-  const router = useRouter();
+  
+  // Set authorization
+    const router = useRouter();
+    const next = "/profile";
 
   useEffect(() => {
     const populateProfile = async () => {
@@ -35,7 +38,7 @@ function Profile() {
           data: { session },
         } = await supabase.auth.getSession();
         if (!session) {
-          return router.push("/login");
+          return router.push(`/login?next=${next}`);
         }
 
         const { data: profile, error } = await supabase

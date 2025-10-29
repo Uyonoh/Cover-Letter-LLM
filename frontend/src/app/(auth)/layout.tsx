@@ -1,35 +1,36 @@
 "use client";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 function AuthLayout(
     {children}: Readonly<{children: React.ReactNode}>
 ) {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const next = searchParams?.get("next") || "/letters";
     const { signInWithProvider } = useAuth();
     
     function SignInWIthGoogle() {
         const error = signInWithProvider(
             "google",
             {
-                redirectTo: "http://localhost:3000/auth/callback",
+                redirectTo: `http://localhost:3000/auth/callback?next=${next}`,
+                queryParams:{
+                    next,
+                },
             });
-
-        if (!error) {
-            router.push("/letters");
-        }
     }
 
     function SignInWIthGithub() {
         const error = signInWithProvider(
             "github",
             {
-                redirectTo: "http://localhost:3000/auth/callback",
+                redirectTo: `http://localhost:3000/auth/callback?next=${next}`,
+                queryParams:{
+                    next,
+                },
             });
-
-        if (!error) {
-            router.push("/letters");
-        }
     }
 
     return (

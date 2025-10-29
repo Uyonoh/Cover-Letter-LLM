@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { apiFetch } from "@/utils/api";
 import { supabase } from "@/utils/supabaseClient";
 import { SendHorizonal } from "lucide-react";
@@ -23,6 +23,16 @@ function View() {
   const [isSaving, setIsSaving] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [isModifying, setIsModifying] = useState(false);
+
+  // Set authorization
+  const router = useRouter();
+  const next = `/letters/${id}`
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      if (!data.session) router.push(`/login?next=${next}`);
+    });
+  }, []);
+
 
   useEffect(() => {
     if (!id) return;

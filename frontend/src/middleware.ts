@@ -24,7 +24,7 @@ export async function middleware(req: NextRequest) {
   );
 
   // If protected and no session, redirect to login
-  if (isProtected && !session) {
+  if (isProtected && !session && false) {
     const loginUrl = req.nextUrl.clone();
     loginUrl.pathname = "/login";
     loginUrl.searchParams.set("next", pathname);
@@ -36,5 +36,5 @@ export async function middleware(req: NextRequest) {
 
 // Match only the relevant routes for efficiency
 export const config = {
-  matcher: ["/letters/:path*", "/profile"],
+  matcher:"/none"// ["/letters/:path*", "/profile"],
 };
