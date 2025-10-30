@@ -32,7 +32,7 @@ function Generate() {
         supabase.auth.getSession().then(({ data }) => {
           if (!data.session) router.push(`/login?next=${next}`);
         });
-      }, [, router]);
+      }, [router]);
 
     useEffect(() => {
         async function getAuth() {
@@ -50,8 +50,8 @@ function Generate() {
           .from("resumes")
           .select("file_name, file_size, uploaded_at, storage_path");
 
-          console.log("Resumes:", resumes);
-          if (!resumes) {
+        // Handle null and empty list
+          if (!resumes || resumes.length == 0) {
             setHasResume(false);
           }
         };
