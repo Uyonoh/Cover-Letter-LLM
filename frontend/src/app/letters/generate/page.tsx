@@ -7,12 +7,14 @@ import { Paperclip } from "lucide-react";
 import { apiFetch } from "@/utils/api";
 import Loading from "@/components/Loading";
 import { ToLogin } from "@/components/ToLogin";
+import { ToProfileUpload } from "@/components/ToProfileUpload";
 
 function Generate() {
     const [jobTitle, setJobTitle] = useState("");
     const [jobDescription, setJobDescription] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const [isAuth, setIsAuth] = useState(false);
+    const [isAuth, setIsAuth] = useState(true);
+    const [hasResume, setHasResume] = useState(true);
 
     // Customization state
     const [style, setStyle] = useState<"professional" | "casual" | "creative">("professional");
@@ -30,7 +32,7 @@ function Generate() {
         supabase.auth.getSession().then(({ data }) => {
           if (!data.session) router.push(`/login?next=${next}`);
         });
-      }, []);
+      }, [, router]);
 
     useEffect(() => {
         async function getAuth() {
@@ -39,6 +41,22 @@ function Generate() {
             setIsAuth(!!user);
         }
         getAuth();
+    }, [router]);
+
+    // Check if the user has an uploaded resume after 2secs
+    useEffect(() => {
+        async function chechResume() {
+            const { data: resumes } = await supabase
+          .from("resumes")
+          .select("file_name, file_size, uploaded_at, storage_path");
+
+          console.log("Resumes:", resumes);
+          if (!resumes) {
+            setHasResume(false);
+          }
+        };
+
+        chechResume();
     }, [router]);
 
     async function handleGenerateLetter(e: React.FormEvent) {
@@ -70,6 +88,7 @@ function Generate() {
         }
     }
 
+    // Reset customization options
     function handleReset() {
         setStyle("professional");
         setLength("standard");
@@ -307,6 +326,7 @@ function Generate() {
                 delay={3500}
             />
             {!isAuth && <ToLogin />}
+            {!hasResume && <ToProfileUpload onContinue={() => setHasResume(true)} />}
         </div>
     );
 }

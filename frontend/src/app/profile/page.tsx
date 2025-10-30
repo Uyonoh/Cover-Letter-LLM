@@ -334,7 +334,7 @@ function Profile() {
       </section>
 
       {/* Resume */}
-      <section className="personal py-5 pb-10 border-b border-secondary">
+      <section className="personal py-5 pb-10 border-b border-secondary" id="resume">
         <h3 className="text-xl font-bold">Your Resume</h3>
         <div className="mt-6">
           <div className="flex items-center justify-center w-full">
