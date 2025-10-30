@@ -247,7 +247,7 @@ function Profile() {
 
         <form
           onSubmit={handleSaveProfile}
-          className="flex flex-col sm:grid sm:grid-cols-2  gap-5 py-2 text-secondary"
+          className="flex flex-col sm:grid sm:grid-cols-2  gap-5 py-2 text-white/80"
         >
           <div className="flex flex-col gap-1">
             <label htmlFor="first-name">First Name</label>
