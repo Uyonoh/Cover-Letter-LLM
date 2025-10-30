@@ -8,6 +8,7 @@ function AuthLayout(
 ) {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const rootUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
     const next = searchParams?.get("next") || "/letters";
     const { signInWithProvider } = useAuth();
     
@@ -15,7 +16,7 @@ function AuthLayout(
         const error = signInWithProvider(
             "google",
             {
-                redirectTo: `http://localhost:3000/auth/callback?next=${next}`,
+                redirectTo: `${rootUrl}/auth/callback?next=${next}`,
                 queryParams:{
                     next,
                 },
@@ -26,7 +27,7 @@ function AuthLayout(
         const error = signInWithProvider(
             "github",
             {
-                redirectTo: `http://localhost:3000/auth/callback?next=${next}`,
+                redirectTo: `${rootUrl}/auth/callback?next=${next}`,
                 queryParams:{
                     next,
                 },
