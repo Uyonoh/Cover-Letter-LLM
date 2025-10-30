@@ -78,7 +78,7 @@ export default function Header() {
             className="rounded-sm"
           />
           <span className="font-extrabold text-xl">
-            AI CoverLetter
+            CoverLetterAI
           </span>
         </Link>
 

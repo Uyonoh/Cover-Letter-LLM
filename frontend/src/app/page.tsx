@@ -41,7 +41,7 @@ function Home() {
 
       <section className="px-3 py-10 my-10 flex flex-col justify-center items-center">
         <div className="flex flex-col gap-5 text-center justify-center items-center max-w-[700px]">
-          <h2 className="font-bold text-2xl tracking-tighter">Why Choose CoverLetterLLM? </h2>
+          <h2 className="font-bold text-2xl tracking-tighter">Why Choose CoverLetterAI? </h2>
           <p className="text-base sm:text-lg text-white/80 tracking-light">Our AI-powered cover letter generator is designed
              to streamline your job application process and maximize your chances of success.</p>
         </div>
