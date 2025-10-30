@@ -1,0 +1,97 @@
+"use client";
+
+import Link from "next/link";
+import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
+import Loading from "@/components/Loading";
+import ForgotPassword from "@/components/ForgotPassword";
+
+
+
+function Login() {
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const [forgotPassword, setForgotPassword] = useState(false);
+    const [err, setErr] = useState("");
+    const {session, signIn, signUp, signOut} = useAuth();
+    const router = useRouter();
+    const searchParams = useSearchParams();
+
+    async function handleLogin(e: React.FormEvent) {
+        e.preventDefault();
+        setErr("");
+        setIsLoading(true);
+        const next = searchParams?.get("next") || "/letters";
+
+        try {
+            const { session, error } =  await signIn(
+                email,
+                password,
+            )
+
+            if (error) {
+                setErr(error.message);
+            } else if(session) {
+                router.push(next);
+            }
+
+        } catch (err: unknown) {
+            setErr("Network error, try again later");
+            console.error(err);
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+
+    return (
+        <form action="" className="form-container flex flex-col justify-center items-between gap-5">
+            <div className="text-center">
+                <h1 className="font-bold text-2xl">Sign in to your account</h1>
+                <p>or <Link href="/register" className="text-blue-600">Create a new account</Link></p>
+            </div>
+
+            {err && 
+            <p className="err w-full text-center text-red-400 text-lg">{err}</p>
+            }
+
+            <div className="flex flex-col gap-4 text-secondary w-full sm:w-[500px]">
+                <div className="flex flex-col gap-4">
+                    <input type="email" name="email" id="email" placeholder="Email"             className="w-full p-2 form-input"
+                     onChange={(e) => setEmail(e.target.value)}/>
+                    <input type="password" name="password" id="password" placeholder="Password" className="w-full p-2 form-input"
+                     onChange={(e) => setPassword(e.target.value)}/>
+                </div>
+                <div className="remember-forgot sm:flex justify-between">
+                    <div className="relative flex gap-2">
+                        <input type="checkbox" name="remember" id="remember"
+                            className=""/>
+                        <label htmlFor="remember">Remember me</label>
+                    </div>
+                    <div className="hidden justify-end sm:block">
+                        <span className="text-blue-600 cursor-pointer" onClick={() => setForgotPassword(true)}>Forgot your password?</span>
+                    </div>
+                </div>
+                <button type="submit"
+                    className="rounded-lg text-white p-2 bg-primary w-full cursor-pointer"
+                    onClick={handleLogin}
+                >Sign In</button>
+                <div className="flex justify-center sm:hidden">
+                        <span className="text-blue-600" onClick={() => setForgotPassword(true)}>Forgot your password?</span>
+                </div>
+            </div>
+
+            <Loading isLoading={isLoading} messages={[
+                "Signing you in",
+                "Verifying Your Identity",
+                "Syncing your data",
+                ]} overlay />
+            
+            <ForgotPassword isOpen={forgotPassword} onCancel={() => setForgotPassword(false)} />
+        </form>
+    );
+}
+
+export default Login

@@ -1,59 +1,23 @@
-// pages/auth/callback.tsx
-'use client'
-
-import { useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { supabase } from '@/utils/supabaseClient';
-import { apiFetch } from '@/utils/api';
+import { Suspense } from 'react';
+import AuthCallback from './AuthCallback';
 import Loading from '@/components/Loading';
 
-export default function AuthCallback() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  useEffect(() => {
-    const next = searchParams?.get("next") || "/letters";
-    const syncSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session?.access_token) {
-        await apiFetch('/auth', {
-          method: 'POST',
-          body: JSON.stringify({ access_token: session.access_token }),
-        })
-        
-        // Check profile
-        const { data: profile, error  } = await supabase
-          .from('profiles')
-          .select('first_name, last_name')
-          .eq('id', session.user.id)
-          .maybeSingle()
-          
-        
-        if (error) {
-          console.error('Error fetching profile:', error.message)
-          // return router.replace('/error')
-        }
-
-        if (!profile?.first_name || !profile?.last_name) {
-          router.replace('/profile/complete')
-        } else {
-          console.log("Pushing from callback to ", next);
-          router.push(next)
-        }
-
-      } else {
-        router.push('/login');
-      }
-    };
-
-    syncSession();
-  });
-
+export default function Page() {
   return (
-    <Loading isLoading messages={[
-      "Fetching your session",
-      "Syncing your data",
-      "Just a moment",
-    ]} overlay />
-  )
+    <Suspense
+      fallback={
+        <Loading
+          isLoading
+          overlay
+          messages={[
+            'Fetching your session',
+            'Syncing your data',
+            'Just a moment',
+          ]}
+        />
+      }
+    >
+      <AuthCallback />
+    </Suspense>
+  );
 }
