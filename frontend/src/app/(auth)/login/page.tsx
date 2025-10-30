@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import Loading from "@/components/Loading";
 import ForgotPassword from "@/components/ForgotPassword";
@@ -17,11 +17,13 @@ function Login() {
     const [err, setErr] = useState("");
     const {session, signIn, signUp, signOut} = useAuth();
     const router = useRouter();
+    const searchParams = useSearchParams();
 
     async function handleLogin(e: React.FormEvent) {
         e.preventDefault();
         setErr("");
         setIsLoading(true);
+        const next = searchParams?.get("next") || "/letters";
 
         try {
             const { session, error } =  await signIn(
@@ -32,7 +34,7 @@ function Login() {
             if (error) {
                 setErr(error.message);
             } else if(session) {
-                router.push("/letters");
+                router.push(next);
             }
 
         } catch (err: unknown) {

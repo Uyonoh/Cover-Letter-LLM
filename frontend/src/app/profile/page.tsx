@@ -25,7 +25,10 @@ function Profile() {
 
   const [isDeleteUserDialogOpen, setIsDeleteUserDialogOpen] = useState(false);
   const [isDeletingUser, setIsDeletingUser] = useState(false);
-  const router = useRouter();
+  
+  // Set authorization
+    const router = useRouter();
+    const next = "/profile";
 
   useEffect(() => {
     const populateProfile = async () => {
@@ -35,7 +38,7 @@ function Profile() {
           data: { session },
         } = await supabase.auth.getSession();
         if (!session) {
-          return router.push("/login");
+          return router.push(`/login?next=${next}`);
         }
 
         const { data: profile, error } = await supabase
@@ -244,7 +247,7 @@ function Profile() {
 
         <form
           onSubmit={handleSaveProfile}
-          className="flex flex-col sm:grid sm:grid-cols-2  gap-5 py-2 text-secondary"
+          className="flex flex-col sm:grid sm:grid-cols-2  gap-5 py-2 text-white/80"
         >
           <div className="flex flex-col gap-1">
             <label htmlFor="first-name">First Name</label>
@@ -331,7 +334,7 @@ function Profile() {
       </section>
 
       {/* Resume */}
-      <section className="personal py-5 pb-10 border-b border-secondary">
+      <section className="personal py-5 pb-10 border-b border-secondary" id="resume">
         <h3 className="text-xl font-bold">Your Resume</h3>
         <div className="mt-6">
           <div className="flex items-center justify-center w-full">

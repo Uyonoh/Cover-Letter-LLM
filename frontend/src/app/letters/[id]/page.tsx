@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { apiFetch } from "@/utils/api";
 import { supabase } from "@/utils/supabaseClient";
 import { SendHorizonal } from "lucide-react";
@@ -23,6 +23,16 @@ function View() {
   const [isSaving, setIsSaving] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [isModifying, setIsModifying] = useState(false);
+
+  // Set authorization
+  const router = useRouter();
+  const next = `/letters/${id}`
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      if (!data.session) router.push(`/login?next=${next}`);
+    });
+  }, []);
+
 
   useEffect(() => {
     if (!id) return;
@@ -87,6 +97,7 @@ function View() {
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();
       setLetter(data.generatedLetter);
+      router.push("#top");
     } catch (err) {
       console.error("Regenerate failed:", err);
       alert("Could not regenerate letter.");
@@ -116,6 +127,7 @@ function View() {
       alert("Modified!");
       const data = await response.json()
       setLetter(data.letter);
+      router.push("#top");
     } catch (err: unknown) {
       console.error("Modify failed:", err);
       alert("Could not modify letter.");
@@ -185,7 +197,7 @@ function View() {
   }
 
   return (
-    <div className="relative py-5 px-5 sm:px-7 md:px-10 text-white/80">
+    <div className="relative py-5 px-5 sm:px-7 md:px-10 text-white/80" id="top">
       <form className="sm:grid sm:grid-cols-12" onSubmit={handleSubmit}>
         <input type="hidden" name="token" id="token" value="" />
         <div className="description col-span-9 sm:border-r sm:border-secondary/80 sm:pr-5 sm:min-h-screen">

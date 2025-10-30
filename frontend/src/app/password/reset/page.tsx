@@ -54,9 +54,9 @@ function ResetPassword() {
 
       <form onSubmit={handleSubmit} className="py-5 flex flex-col gap-4">
         <label htmlFor="password" className="flex gap-2">
-          Password
+          
           <input
-            type="passord"
+            type="password"
             name="password"
             placeholder="Secure password"
             className="form-input"
@@ -65,9 +65,9 @@ function ResetPassword() {
         </label>
 
         <label htmlFor="password1" className="flex gap-2">
-          Password
+          
           <input
-            type="passord"
+            type="password"
             name="password1"
             placeholder="Secure password again"
             className="form-input"

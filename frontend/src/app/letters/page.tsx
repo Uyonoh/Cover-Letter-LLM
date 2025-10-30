@@ -2,8 +2,10 @@
 
 import { Search, Pencil, Download } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiFetch } from "@/utils/api";
+import { supabase } from "@/utils/supabaseClient";
 import type { letterBrief } from "@/types/letters";
 import DeleteButton from "@/components/DeleteButton";
 import Loading from "@/components/Loading";
@@ -22,6 +24,15 @@ function Letters() {
     "Created",
     "Actions",
   ];
+
+  // Set authorization
+    const router = useRouter();
+    const next = "/letters"
+    useEffect(() => {
+      supabase.auth.getSession().then(({ data }) => {
+        if (!data.session) router.push(`/login?next=${next}`);
+      });
+    }, []);
 
   useEffect(() => {
     const loadLetters = async () => {
@@ -153,33 +164,35 @@ function Letters() {
                   <td className="px-4 py-3">
                     {new Date(letter.created_at).toLocaleDateString()}
                   </td>
-                  <td className="px-4 py-3 text-sm flex gap-4 items-center">
-                    <Link
-                      aria-label="Edit letter"
-                      className="hover:underline hover:text-primary flex gap-2 items-center cursor-pointer"
-                      href={`/letters/${letter.id}`}
-                    >
-                      <Pencil size={20} />
-                      <span className="hidden sm:block">Edit</span>
-                    </Link>
-                    <button
-                      aria-label="Download letter"
-                      className="hover:underline hover:text-primary flex gap-2 items-center cursor-pointer"
-                      onClick={() => downloadLetter(letter)}
-                    >
-                      <Download size={20} />
-                      <span className="hidden sm:block">Download</span>
-                    </button>
-                    <DeleteButton
-                      id={letter.id}
-                      table="cover_letters"
-                      text="Delete"
-                      onDeleted={() =>
-                        setLetters((prev) =>
-                          prev.filter((l) => l.id !== letter.id)
-                        )
-                      }
-                    />
+                  <td className="px-4 py-3 text-sm">
+                    <div className="flex gap-4">
+                      <Link
+                        aria-label="Edit letter"
+                        className="hover:underline hover:text-primary flex gap-2 items-center cursor-pointer"
+                        href={`/letters/${letter.id}`}
+                      >
+                        <Pencil size={20} />
+                        <span className="hidden sm:block">Edit</span>
+                      </Link>
+                      <button
+                        aria-label="Download letter"
+                        className="hover:underline hover:text-primary flex gap-2 items-center cursor-pointer"
+                        onClick={() => downloadLetter(letter)}
+                      >
+                        <Download size={20} />
+                        <span className="hidden sm:block">Download</span>
+                      </button>
+                      <DeleteButton
+                        id={letter.id}
+                        table="cover_letters"
+                        text="Delete"
+                        onDeleted={() =>
+                          setLetters((prev) =>
+                            prev.filter((l) => l.id !== letter.id)
+                          )
+                        }
+                      />
+                    </div>
                   </td>
                 </tr>
               ))
