@@ -1,4 +1,10 @@
-"use client";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "T & C",
+  description: "Terms and conditions with using the product.",
+};
+
 
 export default function TermsAndConditions() {
   return (
