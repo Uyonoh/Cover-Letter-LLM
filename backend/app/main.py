@@ -1,8 +1,10 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 import os
 from dotenv import load_dotenv
-from fastapi.middleware.cors import CORSMiddleware
 from app.routes import letters, auth, resumes
+from app.models.schemas.response import ResponseModel
 
 load_dotenv()
 app = FastAPI()
@@ -20,6 +22,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    return JSONResponse(
+        status_code=500,
+        content=ResponseModel(
+            status="error",
+            message="An unexpected error occurred.",
+            error_code="INTERNAL_SERVER_ERROR",
+            details=str(exc)
+        ).model_dump()
+    )
 
 @app.get("/")
 async def root():

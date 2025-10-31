@@ -1,10 +1,13 @@
 from fastapi import APIRouter, Request, Response, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from app.dependencies import get_current_user
+from app.models.schemas.response import ResponseErrors
+from app.utils.response import error_response, success_response, RESPONSE_ERRORS
 from app.models.schemas.auth import BaseModel, User, UserProfile, UserCreateForm, UserLoginForm, Dict, Any
 from app.services.db import get_supabase_client, get_service_client, verify_token, Client
 from supabase_auth.errors import AuthApiError
 import os
+from app.core.logging import logger
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 ENV = os.getenv("ENV", "dev")
@@ -19,7 +22,7 @@ async def set_auth_cookie(payload: TokenPayload, response: Response):
     """
     token = payload.access_token
     if not token:
-        raise HTTPException(status_code=400, detail="Missing access token")
+        return error_response("Missing access token", error_code=RESPONSE_ERRORS.BAD_REQUEST, status_code=400)
 
     response.set_cookie(
         key="sb_access_token",
@@ -29,7 +32,7 @@ async def set_auth_cookie(payload: TokenPayload, response: Response):
         samesite="lax",       # or "strict" depending on your needs
         max_age=60 * 60 * 24  # 1 day
     )
-    return {"message": "Auth cookie set"}
+    return success_response(message="Auth cookie set", status_code=200)
 
 @router.delete("")
 async def clear_auth_cookie(response: Response):
@@ -37,7 +40,7 @@ async def clear_auth_cookie(response: Response):
     Clear the auth cookie (logout).
     """
     response.delete_cookie("sb_access_token")
-    return {"message": "Auth cookie cleared"}
+    return success_response(message="Auth cookie cleared", status_code=200)
 
 @router.post("/register")
 async def register(
@@ -70,15 +73,14 @@ async def register(
         )
     except AuthApiError as e:
         if e.message == "User already registered":
-            return JSONResponse({"message": "This email already exists"}, status_code=401)
-        return JSONResponse({"message": "Invalid email/password"}, status_code=401)
+            return error_response("This email already exists", error_code=RESPONSE_ERRORS.CONFLICT_ERROR, status_code=403)
+        return error_response("Invalid email/password", error_code=RESPONSE_ERRORS.UNAUTHORIZED_ERROR, status_code=401)
     except Exception as e:
-        print(f"Unknown Error: {e}")
-        return JSONResponse({"message": "Network error!\nTry again later or contact support."}, status_code=401)
+        return error_response("Network error!\nTry again later or contact support.", error_code=RESPONSE_ERRORS.UNKNOWN_ERROR, status_code=401)
     
     if ENV == "dev":
-        return JSONResponse({"access_token": access_token}, status_code=201)
-    return JSONResponse({"message", "Signup successful"}, status_code=201)
+        return success_response({"access_token": access_token}, status_code=201)
+    return success_response(message="Signup successful", status_code=201)
 
 
 @router.post("/login")
@@ -92,12 +94,12 @@ async def login(
     try:
         user = supabase.auth.sign_in_with_password({"email": body.email, "password": body.password})
     except AuthApiError:
-        return JSONResponse({"message": "Invalid login credentials"}, status_code=401)
+        return error_response("Invalid login credentials", error_code=RESPONSE_ERRORS.UNAUTHORIZED_ERROR, status_code=401)
     except Exception as e:
-        return JSONResponse({"message": "Network error!\nTry again later or contact support."}, status_code=401)
+        return error_response("Network error!\nTry again later or contact support.", error_code=RESPONSE_ERRORS.UNKNOWN_ERROR, status_code=401)
 
     if not user.session:
-        return JSONResponse({"message": "Invalid credentials"}, status_code=401)
+        return error_response("Invalid user", error_code=RESPONSE_ERRORS.UNAUTHORIZED_ERROR, status_code=401)
 
     access_token = user.session.access_token
 
@@ -112,8 +114,8 @@ async def login(
     )
 
     if ENV == "dev":
-        return JSONResponse({"access_token": access_token}, status_code=200)
-    return JSONResponse({"message": "Login successful"}, status_code=200)
+        return success_response({"access_token": access_token}, status_code=200)
+    return success_response(message="Login successful", status_code=200)
 
 @router.post("/delete-account")
 async def delete_account(
@@ -146,7 +148,7 @@ async def delete_account(
 
     except Exception as e:
         print(f"Error deleting account: {e}")
-        raise HTTPException(status_code=500, detail="Error deleting account")
+        return error_response("Error deleting account", error_code=RESPONSE_ERRORS.SERVER_ERROR, status_code=500)
 
     response.delete_cookie("sb_access_token")
-    return JSONResponse({"message": "Account deleted successfully"})
+    return success_response(message="Account deleted successfully")
