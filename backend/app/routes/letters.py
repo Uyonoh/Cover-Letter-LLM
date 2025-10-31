@@ -4,6 +4,8 @@ from app.dependencies import get_current_user
 from app.services.db import get_supabase_client, get_service_client, verify_token, Client, User
 from app.services.gemini import generate_cover_letter, modify_cover_letter
 from app.models.schemas.cover_letters import GenerateLetterRequest, ModifyLetterRequest, CoverLetter, ModelResponse, datetime, uuid, Dict, Any
+from app.utils.response import error_response, success_response, RESPONSE_ERRORS
+from app.core.logging import logger
 import os
 
 ENV = os.getenv("ENV", "dev")
@@ -33,9 +35,8 @@ async def get_letters(
         .execute()
     )
 
-    print(f"REsponse = {res}")
     headings = ["Title", "Company", "Date Created", "Actions"]
-    return {"headings": headings, "letters": res.data}
+    return success_response({"headings": headings, "letters": res.data})
 
 @router.post("")
 async def generate(
@@ -97,10 +98,10 @@ async def generate(
         res = supabase.table("cover_letters").insert(data).execute()
         letter_id = res.data[0].get("id")
 
-        return {"letter_id": letter_id}
+        return success_response({"letter_id": letter_id})
 
     except Exception as e:
-        return HTTPException(status_code=500, detail=str(e))
+        return error_response(str(e), error_code=RESPONSE_ERRORS.UNKNOWN_ERROR, status_code=500)
 
 
 @router.post("/{letter_id}/regenerate")
@@ -161,10 +162,10 @@ async def regenerate(
         # # Save generated letter (if not handled in frontend)
         # supabase.table("cover_letters").update(data).eq("job_id", job_id).execute()
 
-        return {"generatedLetter": content.cover_letter}
+        return success_response({"generatedLetter": content.cover_letter})
 
     except Exception as e:
-        return JSONResponse({"message": str(e)}, status_code=500)
+        return error_response(str(e), error_code=RESPONSE_ERRORS.UNKNOWN_ERROR, status_code=500)
 
 
 @router.get("/{letter_id}")
@@ -189,10 +190,8 @@ async def view(
         .order("created_at", desc=True)
         .execute()
     )
-
-    print(f"View Response = {res}")
     
-    return {"letter": res.data[0]}
+    return success_response({"letter": res.data[0]})
 
 @router.post("/modify")
 async def modify_letter(
@@ -206,9 +205,7 @@ async def modify_letter(
             request=payload,
         )
         
-        return JSONResponse({"ok": True, "letter": cover_letter})
+        return success_response({"letter": cover_letter})
     
     except Exception as e:
-        print(f"Exception: {e}")
-        return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
-
+        return error_response( str(e), error_code=RESPONSE_ERRORS.UNKNOWN_ERROR, status_code=500)

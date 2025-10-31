@@ -6,6 +6,8 @@ from datetime import datetime, timezone
 from app.utils.text import extract_pdf_text, extract_docx_text
 from app.services.gemini import parse_resume
 from app.services.db import get_supabase_client, get_service_client, Client
+from app.utils.response import error_response, success_response, RESPONSE_ERRORS
+from app.core.logging import logger
 
 router = APIRouter(prefix="/resumes", tags=["resumes"])
 
@@ -16,7 +18,7 @@ async def parse_resume_background(payload: dict, background_tasks: BackgroundTas
 
     # Schedule the parsing job
     background_tasks.add_task(process_resume, user_id, storage_path)
-    return {"status": "scheduled"}
+    return success_response(message="scheduled", status_code=202)
 
 def process_resume(
     user_id: str,
@@ -26,7 +28,7 @@ def process_resume(
     # 1. Download file from Supabase storage
     file_resp = supabase.storage.from_("resumes").download(storage_path)
     if not file_resp:
-        print("Failed to download file from Supabase")
+        logger.error("Failed to download file from Supabase")
         return
 
     # Save to temp file
@@ -46,7 +48,7 @@ def process_resume(
     os.remove(tmp_path)
 
     if not raw_text.strip():
-        print("No text extracted")
+        logger.error("No text extracted")
         return
 
     # 3. Parse with Gemini
@@ -58,4 +60,4 @@ def process_resume(
         "parsed_at": datetime.now(timezone.utc).isoformat()
     }).eq("user_id", user_id).eq("storage_path", storage_path).execute()
 
-    print(f"Resume parsed and saved for {user_id}")
+    logger.info(f"Resume parsed and saved for {user_id}")

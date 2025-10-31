@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Request, Response, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from app.dependencies import get_current_user
-from app.models.schemas.response import ResponseErrors
 from app.utils.response import error_response, success_response, RESPONSE_ERRORS
 from app.models.schemas.auth import BaseModel, User, UserProfile, UserCreateForm, UserLoginForm, Dict, Any
 from app.services.db import get_supabase_client, get_service_client, verify_token, Client
@@ -148,7 +147,7 @@ async def delete_account(
 
     except Exception as e:
         print(f"Error deleting account: {e}")
-        return error_response("Error deleting account", error_code=RESPONSE_ERRORS.SERVER_ERROR, status_code=500)
+        return error_response("Error deleting account", error_code=RESPONSE_ERRORS.UNKNOWN_ERROR, status_code=500)
 
     response.delete_cookie("sb_access_token")
     return success_response(message="Account deleted successfully")
