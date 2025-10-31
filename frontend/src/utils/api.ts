@@ -15,7 +15,16 @@ async function apiFetch(path: string, options: RequestInit = {}) {
     },
   });
 
-  return res;
+  const json = await res.json();
+
+  if (json.status === "error") {
+    const error = new Error(json.message || "An error occurred");
+    (error as any).code = json.error_code;
+    (error as any).details = json.details;
+    throw error;
+  }
+
+  return json.data;
 }
 
 export { apiFetch };

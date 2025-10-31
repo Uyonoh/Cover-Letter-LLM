@@ -15,8 +15,6 @@ class ResponseErrors (StrEnum):
     BAD_REQUEST_ERROR = "BAD_REQUEST"            # Error for malformed requests
     UNKNOWN_ERROR = "UNKNOWN_ERROR"
 
-    def __init__(self):
-        super().__init__()
 
 def get_all_error_codes():
     return [value for key, value in ResponseErrors.__dict__.items() if not key.startswith("__")]

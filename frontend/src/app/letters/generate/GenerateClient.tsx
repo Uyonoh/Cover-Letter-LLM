@@ -63,7 +63,7 @@ function GenerateClient() {
         e.preventDefault();
         setIsLoading(true);
         try {
-            const res = await apiFetch("/letters", {
+            const data = await apiFetch("/letters", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -77,12 +77,10 @@ function GenerateClient() {
                 }),
             });
 
-            if (res.ok) {
-                const data = await res.json();
-                router.push(`/letters/${data.letter_id}`);
-            } else {
-                alert("Generation Failed");
-            }
+            router.push(`/letters/${data.letter_id}`);
+        } catch(err: any) {
+            alert("Generation Failed");
+            console.error(err);
         } finally {
             setIsLoading(false);
         }

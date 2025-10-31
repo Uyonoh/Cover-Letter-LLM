@@ -30,15 +30,12 @@ export function useResumeParser() {
       const formData = new FormData();
       formData.append("file", file);
 
-      const res = await apiFetch("/resumes/parse", {
+      const data = await apiFetch("/resumes/parse", {
         method: "POST",
         body: formData,
       });
 
-      if (!res.ok) throw new Error("Failed to parse resume");
-
-      const data = await res.json();
-      setParsedData(data.data); // matches FastAPI response { data: {...} }
+      setParsedData(data.data);
       return data.data as ResumeData;
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);

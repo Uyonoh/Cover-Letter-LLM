@@ -248,21 +248,14 @@ function ProfileClient() {
     setIsDeletingUser(true);
 
     try {
-      const response = await apiFetch("/auth/delete-account", {
+      await apiFetch("/auth/delete-account", {
         method: "POST",
       });
-
-      if (!response.ok) {
-        const err = await response.text();
-        console.error("Error deleting account:", err);
-        alert(`Failed to delete account: ${err}`);
-        return;
-      }
 
       await supabase.auth.signOut();
       router.push("/");
     } catch (error) {
-      console.error("Error deleting account:", error);
+      console.error("Error deleting account: ", error);
       alert("Failed to delete account. Please try again.");
       return;
     } finally {

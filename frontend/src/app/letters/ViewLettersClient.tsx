@@ -18,32 +18,28 @@ function ViewLettersClient() {
   // pagination
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10; // number of rows per page
-  const headings = [
-    "Job Title",
-    "Company",
-    "Created",
-    "Actions",
-  ];
+  const headings = ["Job Title", "Company", "Created", "Actions"];
 
   // Set authorization
-    const router = useRouter();
-    const next = "/letters"
-    useEffect(() => {
-      supabase.auth.getSession().then(({ data }) => {
-        if (!data.session) router.push(`/login?next=${next}`);
-      });
-    }, []);
+  const router = useRouter();
+  const next = "/letters";
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      if (!data.session) router.push(`/login?next=${next}`);
+    });
+  }, []);
 
   useEffect(() => {
     const loadLetters = async () => {
       try {
-        const res = await apiFetch("/letters");
-        if (!res.ok) throw new Error(await res.text());
-        const data = await res.json();
+        const data = await apiFetch("/letters");
         setLetters(data.letters || []);
-      } catch (err: unknown) {
-        console.error("Fetch error:", err);
-        setError("Failed to load letters.");
+      } catch (err: any) {
+        if (err.code === "VALIDATION_ERROR") {
+          setError(`Validation failed: ${err.message}`);
+        } else {
+          setError("Something went wrong. Please try again later.");
+        }
       } finally {
         setIsLoading(false);
       }
@@ -86,11 +82,16 @@ function ViewLettersClient() {
   }
 
   if (isLoading) {
-    return <Loading isLoading={isLoading} messages={[
-      "Loading your letters",
-      "Populating tables",
-      "Just a moment",
-    ]} />;
+    return (
+      <Loading
+        isLoading={isLoading}
+        messages={[
+          "Loading your letters",
+          "Populating tables",
+          "Just a moment",
+        ]}
+      />
+    );
   }
 
   if (error) {

@@ -39,10 +39,6 @@ function LetterViewClient() {
     setIsLoading(true);
 
     apiFetch(`/letters/${id}`)
-      .then(async (res) => {
-        if (!res.ok) throw new Error(await res.text());
-        return res.json();
-      })
       .then((data: {letter: LetterView}) => {
         setJobTitle(data.letter?.jobs?.title ?? "");
         setJobId(data.letter?.job_id ?? "");
@@ -87,15 +83,12 @@ function LetterViewClient() {
     // TODO: Add selection of various modifiers
     try {
       setIsRegenerating(true);
-      const res = await apiFetch(`/letters/${id}/regenerate`, {
+      const data = await apiFetch(`/letters/${id}/regenerate`, {
         method: "POST",
         // body: JSON.stringify({
         //   jobTitle,
         // }),
       });
-
-      if (!res.ok) throw new Error(await res.text());
-      const data = await res.json();
       setLetter(data.generatedLetter);
       router.push("#top");
     } catch (err) {
@@ -115,17 +108,12 @@ function LetterViewClient() {
         job_title: jobTitle,
         prompt: prompt
       };
-      const response = await apiFetch("/letters/modify", {
+      const data = await apiFetch("/letters/modify", {
         method: "POST",
         body: JSON.stringify(payload),
       });
 
-      if (!response.ok) {
-        alert("Failed to modify Letter!");
-        return;
-      }
       alert("Modified!");
-      const data = await response.json()
       setLetter(data.letter);
       router.push("#top");
     } catch (err: unknown) {

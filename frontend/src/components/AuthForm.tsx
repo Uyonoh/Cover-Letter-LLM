@@ -21,21 +21,18 @@ export default function AuthForm() {
     e.preventDefault();
 
     try {
-      const res = await apiFetch("/auth/login", {
+      const data = await apiFetch("/auth/login", {
         method: "POST",
         body: JSON.stringify({ email, password }),
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        localStorage.setItem("access_token", data.access_token);
-        router.push("/letters/generate"); // redirect after login
-        console.log("logged in");
-      } else {
-        alert("Login failed");
-      }
+      
+      
+      localStorage.setItem("access_token", data.access_token);
+      router.push("/letters/generate"); // redirect after login
+
     } catch (err) {
-      console.error(err);
+      console.error("Login failed:", err);
       alert("Error logging in");
     }
   }
