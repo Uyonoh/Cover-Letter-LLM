@@ -12,12 +12,20 @@ import type { Resume } from "@/types/resumes";
 
 function ProfileClient() {
   const [firstName, setFirstName] = useState("");
+  const [initialFirstName, setInitialFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [initialLastName, setInitialLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [initialEmail, setInitialEmail] = useState("");
   const [career_title, setCareerTitle] = useState("");
+  const [initialCareer_title, setInitialCareerTitle] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [initialPhoneNumber, setInitialPhoneNumber] = useState("");
   const [location, setLocation] = useState("");
+  const [initialLocation, setInitialLocation] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  const [saveDisabled, setSaveDisabled] = useState(true);
 
   const [selectedResume, setSelectedResume] = useState<Resume | null>(null);
   const [resumes, setResumes] = useState<Resume[]>([]);
@@ -58,6 +66,14 @@ function ProfileClient() {
         setPhoneNumber(profile?.phone_number || "");
         setLocation(profile?.location ?? "");
 
+        // set comparison vars
+        setInitialFirstName(profile?.first_name ?? "");
+        setInitialLastName(profile?.last_name ?? "");
+        setInitialEmail(session.user.email || "");
+        setInitialCareerTitle(profile?.career_title ?? "");
+        setInitialPhoneNumber(profile?.phone_number || "");
+        setInitialLocation(profile?.location ?? "");
+
         // Resume
         const { data: resumes } = await supabase
           .from("resumes")
@@ -70,6 +86,23 @@ function ProfileClient() {
 
     populateProfile();
   }, [router]);
+
+  // compare old and new profile info on change
+  useEffect(() => {
+    const fname = firstName === initialFirstName;
+    const lname = lastName === initialLastName;
+    const mail = email === initialEmail;
+    const title = career_title === initialCareer_title;
+    const phone = phoneNumber === initialPhoneNumber;
+    const loc = location === initialLocation;
+
+    if (fname && lname && mail && title && phone && loc ) {
+      setSaveDisabled(true);
+      return;
+    }
+
+    setSaveDisabled(false);
+  }, [firstName, lastName, email, career_title, phoneNumber, location]);
 
   async function handleSaveProfile(e: React.FormEvent) {
     e.preventDefault();
@@ -324,8 +357,8 @@ function ProfileClient() {
           <div className="col-span-2 flex justify-end mt-4">
             <button
               type="submit"
-              className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer"
-              disabled={isLoading}
+              className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer disabled:bg-gray-500 disabled:text-white disabled:cursor-not-allowed"
+              disabled={isLoading || saveDisabled}
             >
               {isLoading ? "Saving..." : "Save Changes"}
             </button>
