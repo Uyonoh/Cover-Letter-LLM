@@ -16,6 +16,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "CoverLetterLLM",
   description: "The perfect coverletter for your job.",
+  verification: {
+    google: "bhWG9i5XMs9d5VWJGKKwwu9HTmONOATeH0b_-U9FXqI"
+  }
 };
 
 export default function RootLayout({

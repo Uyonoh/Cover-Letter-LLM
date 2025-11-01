@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiFetch } from "@/utils/api";
 import { supabase } from "@/utils/supabaseClient";
+import { useAuth } from "@/hooks/useAuth";
 import type { letterBrief } from "@/types/letters";
 import DeleteButton from "@/components/DeleteButton";
 import Loading from "@/components/Loading";
@@ -23,6 +24,8 @@ function ViewLettersClient() {
   // Set authorization
   const router = useRouter();
   const next = "/letters";
+
+  const { session } = useAuth();
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (!data.session) router.push(`/login?next=${next}`);
@@ -33,6 +36,7 @@ function ViewLettersClient() {
     const loadLetters = async () => {
       try {
         const data = await apiFetch("/letters");
+
         setLetters(data.letters || []);
       } catch (err: any) {
         if (err.code === "VALIDATION_ERROR") {

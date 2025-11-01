@@ -20,9 +20,10 @@ async def get_letters(
     request: Request,
     user: Dict[str, Any]=Depends(get_current_user),
     supabase: Client=Depends(get_supabase_client),
-    response_model=ResponseModel[ListLetterResponseData],
+    # response_model=ResponseModel[ListLetterResponseData],
     ):
 
+    logger.info(f"USER: {user}")
     if ENV == "dev":
         auth = request.headers.get("authorization")
         if auth and auth.startswith("Bearer "):
@@ -176,7 +177,7 @@ async def view(
     letter_id,
     user: Dict[str, Any]=Depends(get_current_user),
     supabase: Client=Depends(get_supabase_client),
-    response_model=ResponseModel[ViewLetterResponseData]
+    # response_model=ResponseModel[ViewLetterResponseData]
 ):
     
     if ENV == "dev":
