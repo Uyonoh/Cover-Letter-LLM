@@ -29,14 +29,21 @@ class ModifyLetterRequest(BaseModel):
     prompt: str
 
 
-class ListLetterResponse(BaseModel):
+class ListLetterResponseLetter(BaseModel):
   id: str
   jobs: Job
   content: str
   created_at: datetime
 
-class ViewLetterResponse(CoverLetter):
+class ListLetterResponseData(BaseModel):
+   headings: List[str]
+   letters: List[ListLetterResponseLetter]
+
+class ViewLetterResponseLetter(CoverLetter):
   jobs: Job
+
+class ViewLetterResponseData(BaseModel):
+   letter: ViewLetterResponseLetter
 
 
 class SkillsFromJD(BaseModel):
@@ -46,7 +53,7 @@ class SkillsFromJD(BaseModel):
     general: Optional[List[str]] = []
     devops: Optional[List[str]] = []
 
-class ModelResponse(BaseModel):
+class ModelResponseData(BaseModel):
     job_title: str
     company_name: str
     location: Optional[str] = None

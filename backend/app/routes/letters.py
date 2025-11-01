@@ -3,7 +3,8 @@ from fastapi.responses import JSONResponse
 from app.dependencies import get_current_user
 from app.services.db import get_supabase_client, get_service_client, verify_token, Client, User
 from app.services.gemini import generate_cover_letter, modify_cover_letter
-from app.models.schemas.cover_letters import GenerateLetterRequest, ModifyLetterRequest, CoverLetter, ModelResponse, datetime, uuid, Dict, Any
+from app.models.schemas.response import ResponseModel
+from app.models.schemas.cover_letters import GenerateLetterRequest, ModifyLetterRequest, CoverLetter, ListLetterResponseData, ViewLetterResponseData, ModelResponseData, datetime, uuid, Dict, Any
 from app.utils.response import error_response, success_response, RESPONSE_ERRORS
 from app.core.logging import logger
 import os
@@ -19,6 +20,7 @@ async def get_letters(
     request: Request,
     user: Dict[str, Any]=Depends(get_current_user),
     supabase: Client=Depends(get_supabase_client),
+    response_model=ResponseModel[ListLetterResponseData],
     ):
 
     if ENV == "dev":
@@ -62,7 +64,7 @@ async def generate(
         data = supabase.from_("resumes").select("*").eq("user_id", user_id).limit(1).execute().data
         resume = data[0].get("parsed_data") if data and len(data) > 0 else None
         print("Generating...")
-        content: ModelResponse = await generate_cover_letter(
+        content: ModelResponseData = await generate_cover_letter(
             model="gemini-2.5-flash",
             request=body,
             resume_text=resume,
@@ -148,7 +150,7 @@ async def regenerate(
         resume = data[0].get("parsed_data") if data and len(data) > 0 else None
 
         # Call gemini to generate letter
-        content: ModelResponse = await generate_cover_letter(
+        content: ModelResponseData = await generate_cover_letter(
             model="gemini-2.5-flash",
             request=payload,
             resume_text=resume,
@@ -174,6 +176,7 @@ async def view(
     letter_id,
     user: Dict[str, Any]=Depends(get_current_user),
     supabase: Client=Depends(get_supabase_client),
+    response_model=ResponseModel[ViewLetterResponseData]
 ):
     
     if ENV == "dev":

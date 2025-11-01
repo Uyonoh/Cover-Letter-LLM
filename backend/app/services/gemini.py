@@ -10,7 +10,7 @@ from google import genai
 from google.genai import types
 from dotenv import load_dotenv
 
-from app.models.schemas.cover_letters import GenerateLetterRequest, ModifyLetterRequest, ModelResponse
+from app.models.schemas.cover_letters import GenerateLetterRequest, ModifyLetterRequest, ModelResponseData
 
 load_dotenv()
 
@@ -186,7 +186,7 @@ async def generate_cover_letter(model:str, request: GenerateLetterRequest, resum
     
     try:
         parsed = json.loads(response)
-        validated = ModelResponse(**parsed) # Validate the response
+        validated = ModelResponseData(**parsed) # Validate the response
         # validated = validated.model_dump() # Convert back to dict
         return validated
     except Exception as e:

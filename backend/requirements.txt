@@ -2,6 +2,7 @@ asyncpg>=0.30.0
 fastapi[standard]>=0.117.1
 google-genai>=1.39.0
 psycopg2>=2.9.10
+pydantic-to-typescript>=2.0.0
 pymupdf>=1.26.5
 python-docx>=1.2.0
 python-dotenv>=1.1.1
