@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/utils/supabaseClient";
 import { Paperclip } from "lucide-react";
 import { apiFetch } from "@/utils/api";
+import { APIError } from "@/types/api";
 import Loading from "@/components/Loading";
 import { ToLogin } from "@/components/ToLogin";
 import { ToProfileUpload } from "@/components/ToProfileUpload";
@@ -78,9 +79,9 @@ function GenerateClient() {
             });
 
             router.push(`/letters/${data.letter_id}`);
-        } catch(err: any) {
+        } catch(err: unknown) {
             alert("Generation Failed");
-            console.error(err);
+            console.error((err as APIError));
         } finally {
             setIsLoading(false);
         }

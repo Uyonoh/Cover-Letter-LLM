@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiFetch } from "@/utils/api";
+import { APIError } from "@/types/api";
 import { supabase } from "@/utils/supabaseClient";
 import { useAuth } from "@/hooks/useAuth";
 import type { letterBrief } from "@/types/letters";
@@ -38,9 +39,9 @@ function ViewLettersClient() {
         const data = await apiFetch("/letters");
 
         setLetters(data.letters || []);
-      } catch (err: any) {
-        if (err.code === "VALIDATION_ERROR") {
-          setError(`Validation failed: ${err.message}`);
+      } catch (err: unknown) {
+        if ((err as APIError).code === "VALIDATION_ERROR") {
+          setError(`Validation failed: ${(err as APIError).message}`);
         } else {
           setError("Something went wrong. Please try again later.");
         }
