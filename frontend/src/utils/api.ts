@@ -1,4 +1,5 @@
 import { supabase } from "./supabaseClient";
+import type { APIError } from "@/types/api";
 
 const apiRoot = process.env.NEXT_PUBLIC_API_URL?.toString();
 
@@ -19,8 +20,8 @@ async function apiFetch(path: string, options: RequestInit = {}) {
 
   if (json.status === "error") {
     const error = new Error(json.message || "An error occurred");
-    (error as any).code = json.error_code;
-    (error as any).details = json.details;
+    (error as APIError).code = json.error_code;
+    (error as APIError).details = json.details;
     throw error;
   }
 

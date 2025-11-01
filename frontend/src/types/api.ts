@@ -1,5 +1,6 @@
-interface apiError {
-    message: string;
-};
+interface APIError extends Error {
+  code: string;
+  details: string;
+}
 
-export type { apiError };
+export type { APIError };
