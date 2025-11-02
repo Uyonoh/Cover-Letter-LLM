@@ -28,10 +28,10 @@ export default function AuthCallback() {
         }
 
         // Sync session with backend
-        await apiFetch('/auth', {
-          method: 'POST',
-          body: JSON.stringify({ access_token: session.access_token }),
-        });
+        // await apiFetch('/auth', {
+        //   method: 'POST',
+        //   body: JSON.stringify({ access_token: session.access_token }),
+        // });
 
         // Check for completed profile
         const { data: profile, error: profileError } = await supabase

@@ -26,36 +26,53 @@ function LetterViewClient() {
 
   // Set authorization
   const router = useRouter();
-  const next = `/letters/${id}`
+  const next = `/letters/${id}`;
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (!data.session) router.push(`/login?next=${next}`);
     });
   }, []);
 
-
   useEffect(() => {
     if (!id) return;
-    setIsLoading(true);
 
-    apiFetch(`/letters/${id}`)
-      .then((data: {letter: LetterView}) => {
-        setJobTitle(data.letter?.jobs?.title ?? "");
-        setJobId(data.letter?.job_id ?? "");
-        setLetter(data.letter?.content ?? "");
-        setOldLetter(data.letter?.content ?? "");
-      })
-      .catch((err) => {
+    async function loadLetter() {
+      try {
+        setIsLoading(true);
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        const { data, error } = await supabase
+          .from("cover_letters")
+          .select("id, content, created_at, jobs(title, company)")
+          .eq("user_id", session?.user.id)
+          .eq("id", id)
+          .maybeSingle();
+
+        const letter = data as unknown as LetterView;
+
+        setJobTitle(letter?.jobs?.title ?? "");
+        setJobId(letter?.job_id ?? "");
+        setLetter(letter?.content ?? "");
+        setOldLetter(letter?.content ?? "");
+
+      } catch (err: unknown) {
         console.error("Fetch error:", err);
         alert("Failed to load letter");
-      })
-      .finally(() => setIsLoading(false));
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadLetter();
   }, [id]);
 
-  function handleSetPrompt (newPrompt: string) {
+  function handleSetPrompt(newPrompt: string) {
     if (newPrompt.length <= max_prompt_length) {
       setPrompt(newPrompt);
-    }}
+    }
+  }
 
   useEffect(() => {
     const popularPrompts = [
@@ -70,7 +87,7 @@ function LetterViewClient() {
       "Rewrite the last paragraph to convey genuine excitement and innitiative",
       "Add a concise anecdote that illustrates problem-solving skills or passion",
       "Make it clear that I'm already fluent in this industry",
-    ]
+    ];
     // Only use n random prompts
     const n = 3;
     const shuffled = popularPrompts.sort(() => 0.5 - Math.random());
@@ -100,13 +117,12 @@ function LetterViewClient() {
   }
 
   async function handleModify() {
-
     try {
       setIsModifying(true);
       const payload = {
         letter: letter,
         job_title: jobTitle,
-        prompt: prompt
+        prompt: prompt,
       };
       const data = await apiFetch("/letters/modify", {
         method: "POST",
@@ -157,22 +173,21 @@ function LetterViewClient() {
   async function handleDeleteJob() {
     // Check if that job still has letters
     const { count } = await supabase
-      .from('letters')
-      .select('id', { count: 'exact', head: true })
-      .eq('job_id', jobId);
+      .from("letters")
+      .select("id", { count: "exact", head: true })
+      .eq("job_id", jobId);
 
     if (count === 0) {
-      await supabase.from('jobs').delete().eq('id', jobId);
+      await supabase.from("jobs").delete().eq("id", jobId);
     }
   }
 
   if (isLoading) {
     return (
-      <Loading isLoading={isLoading} messages={[
-        "Loading your letter",
-        "Populating data",
-        "Just a moment",
-      ]} />
+      <Loading
+        isLoading={isLoading}
+        messages={["Loading your letter", "Populating data", "Just a moment"]}
+      />
     );
   }
 
@@ -244,8 +259,10 @@ function LetterViewClient() {
 
         {/* Right on larger screens, wrap under on small screen */}
         <div className="custumization  sm:col-span-3 sm:pl-5 flex flex-col gap-7">
-          <h3 className="font-bold text-xl text-white pt-2">Customize Your Letter</h3>
-          
+          <h3 className="font-bold text-xl text-white pt-2">
+            Customize Your Letter
+          </h3>
+
           {/* Custom prompt text area */}
           <div className="relative w-full">
             <textarea
@@ -261,7 +278,14 @@ function LetterViewClient() {
 
             <div className="absolute bottom-3 w-full flex items-center justify-between h-10 px-2">
               {/* Character count */}
-              <div className={`text-sm ` + (prompt.length >= max_prompt_length ? "text-red-500" : "text-white/70")}>
+              <div
+                className={
+                  `text-sm ` +
+                  (prompt.length >= max_prompt_length
+                    ? "text-red-500"
+                    : "text-white/70")
+                }
+              >
                 {prompt.length}/{max_prompt_length}
               </div>
 
@@ -278,24 +302,22 @@ function LetterViewClient() {
             </div>
           </div>
 
-
-
           {/* Suggestions */}
           <div className="flex flex-col gap-3">
             <p>Popular Fixes</p>
             <div className="flex flex-wrap gap-3">
-                {prompts.map((p, idx) => (
+              {prompts.map((p, idx) => (
                 <button
                   key={idx}
                   type="button"
                   onClick={() => setPrompt(p)}
-                  className="rounded-lg px-3 py-1 border border-secondary text-sm hover:bg-gray-700 cursor-pointer">
+                  className="rounded-lg px-3 py-1 border border-secondary text-sm hover:bg-gray-700 cursor-pointer"
+                >
                   {p}
                 </button>
-                ))}
+              ))}
             </div>
           </div>
-              
         </div>
         <div className="flex sm:hidden gap-3 justify-between my-7">
           <button
@@ -317,22 +339,30 @@ function LetterViewClient() {
         {/* <button type="submit" className="rounded-lg p-2 sm:hidden bg-primary w-full my-7 cursor-pointer">Generate Cover Letter</button> */}
       </form>
 
-      <Loading isLoading={isModifying} overlay messages={[
-        "Parsing Prompt",
-        "Anallyzing letter",
-        "Making appropriate changes",
-        "Just a moment",
-      ]} />
-      <Loading isLoading={isRegenerating} overlay messages={[
-        "Validating your letter",
-        "Making changes",
-        "Just a moment",
-      ]} />
-      <Loading isLoading={isSaving} overlay messages={[
-        "Validating your letter",
-        "Sending to database",
-        "Just a moment",
-      ]} />
+      <Loading
+        isLoading={isModifying}
+        overlay
+        messages={[
+          "Parsing Prompt",
+          "Anallyzing letter",
+          "Making appropriate changes",
+          "Just a moment",
+        ]}
+      />
+      <Loading
+        isLoading={isRegenerating}
+        overlay
+        messages={["Validating your letter", "Making changes", "Just a moment"]}
+      />
+      <Loading
+        isLoading={isSaving}
+        overlay
+        messages={[
+          "Validating your letter",
+          "Sending to database",
+          "Just a moment",
+        ]}
+      />
     </div>
   );
 }

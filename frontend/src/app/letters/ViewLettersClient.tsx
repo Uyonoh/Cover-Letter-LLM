@@ -26,7 +26,6 @@ function ViewLettersClient() {
   const router = useRouter();
   const next = "/letters";
 
-  const { session } = useAuth();
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (!data.session) router.push(`/login?next=${next}`);
@@ -35,16 +34,18 @@ function ViewLettersClient() {
 
   useEffect(() => {
     const loadLetters = async () => {
+      const { data : { session }} = await supabase.auth.getSession();
       try {
-        const data = await apiFetch("/letters");
+        const { data: letters, error } = await supabase.from("cover_letters")
+          .select("id, content, created_at, jobs(title, company)")
+          .eq("user_id", session?.user.id)
+          .order("created_at", {ascending: false})
 
-        setLetters(data.letters || []);
-      } catch (err: unknown) {
-        if ((err as APIError).code === "VALIDATION_ERROR") {
-          setError(`Validation failed: ${(err as APIError).message}`);
-        } else {
-          setError("Something went wrong. Please try again later.");
+        if (letters) {
+          setLetters((letters as letterBrief[]) || []);
         }
+      } catch (err: unknown){
+        console.error("Error: ", err);
       } finally {
         setIsLoading(false);
       }
@@ -79,7 +80,7 @@ function ViewLettersClient() {
 
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${letter.jobs.title.replace(/\s+/g, "_")}_cover_letter.txt`;
+    a.download = `${letter.jobs.title?.replace(/\s+/g, "_")}_cover_letter.txt`;
     a.click();
 
     // Clean up

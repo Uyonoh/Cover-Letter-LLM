@@ -22,19 +22,19 @@ function useAuth() {
             setSession(session);
 
             // Sync the access token into an HttpOnly cookie via API route
-            if (session) {
-                fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "Application/json",
-                    },
-                    body: JSON.stringify({"access_token": session.access_token}),
-                });
-            } else {
-                fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth`, {
-                    method: "DELETE",
-                });
-            }
+            // if (session) {
+            //     fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth`, {
+            //         method: "POST",
+            //         headers: {
+            //             "Content-Type": "Application/json",
+            //         },
+            //         body: JSON.stringify({"access_token": session.access_token}),
+            //     });
+            // } else {
+            //     fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth`, {
+            //         method: "DELETE",
+            //     });
+            // }
         });
         return () => data.subscription.unsubscribe();
     }, []);
@@ -84,7 +84,7 @@ function useAuth() {
     // Sign out and clear cookie
     const signOut = async (): Promise<void> => {
       await supabase.auth.signOut()
-      await fetch('/api/auth', { method: 'DELETE' })
+      // await fetch('/api/auth', { method: 'DELETE' })
       setSession(null)
     }
   
