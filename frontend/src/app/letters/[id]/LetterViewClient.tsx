@@ -102,9 +102,6 @@ function LetterViewClient() {
       setIsRegenerating(true);
       const data = await apiFetch(`/letters/${id}/regenerate`, {
         method: "POST",
-        // body: JSON.stringify({
-        //   jobTitle,
-        // }),
       });
       setLetter(data.generatedLetter);
       router.push("#top");

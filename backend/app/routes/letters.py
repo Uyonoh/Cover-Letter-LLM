@@ -9,26 +9,16 @@ from app.utils.response import error_response, success_response, RESPONSE_ERRORS
 from app.core.logging import logger
 import os
 
-ENV = os.getenv("ENV", "dev")
 router = APIRouter(prefix="/letters", tags=["letters"])
 
-# In-memory storage for demo (replace with Supabase in production)
-letters_db = {}
 
 @router.get("")
 async def get_letters(
     request: Request,
     user: Dict[str, Any]=Depends(get_current_user),
-    supabase: Client=Depends(get_supabase_client),
+    supabase: Client=Depends(get_service_client),
     # response_model=ResponseModel[ListLetterResponseData],
     ):
-
-    logger.info(f"USER: {user}")
-    if ENV == "dev":
-        auth = request.headers.get("authorization")
-        if auth and auth.startswith("Bearer "):
-            token = auth.split(" ")[1]
-        supabase.postgrest.auth(token)
 
     res = (
         supabase.table("cover_letters")
@@ -46,15 +36,8 @@ async def generate(
     request: Request,
     body: GenerateLetterRequest,
     user: Dict[str, Any]=Depends(get_current_user),
-    supabase: Client = Depends(get_supabase_client)
+    supabase: Client = Depends(get_service_client)
 ) -> dict[str, Any]:
-
-    # Ensure user is authenticatd using their JWT token
-    if ENV == "dev":
-        auth = request.headers.get("authorization")
-        if auth and auth.startswith("Bearer "):
-            token = auth.split(" ")[1]
-        supabase.postgrest.auth(token)
 
     user_id: str = user["sub"]
 
@@ -112,14 +95,8 @@ async def regenerate(
     request: Request,
     letter_id,
     user: Dict[str, Any]=Depends(get_current_user),
-    supabase: Client=Depends(get_supabase_client),
+    supabase: Client=Depends(get_service_client),
 ):
-    
-    if ENV == "dev":
-        auth = request.headers.get("authorization")
-        if auth and auth.startswith("Bearer "):
-            token = auth.split(" ")[1]
-        supabase.postgrest.auth(token)
 
     # Generate Cover letter
     try:
@@ -176,15 +153,9 @@ async def view(
     request: Request,
     letter_id,
     user: Dict[str, Any]=Depends(get_current_user),
-    supabase: Client=Depends(get_supabase_client),
+    supabase: Client=Depends(get_service_client),
     # response_model=ResponseModel[ViewLetterResponseData]
 ):
-    
-    if ENV == "dev":
-        auth = request.headers.get("authorization")
-        if auth and auth.startswith("Bearer "):
-            token = auth.split(" ")[1]
-        supabase.postgrest.auth(token)
 
     res = (
         supabase.table("cover_letters")

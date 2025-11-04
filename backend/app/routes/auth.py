@@ -9,7 +9,6 @@ import os
 from app.core.logging import logger
 
 router = APIRouter(prefix="/auth", tags=["auth"])
-ENV = os.getenv("ENV", "dev")
 
 class TokenPayload(BaseModel):
     access_token: str
@@ -77,8 +76,8 @@ async def register(
     except Exception as e:
         return error_response("Network error!\nTry again later or contact support.", error_code=RESPONSE_ERRORS.UNKNOWN_ERROR, status_code=401)
     
-    if ENV == "dev":
-        return success_response({"access_token": access_token}, status_code=201)
+    # if ENV == "dev":
+    #     return success_response({"access_token": access_token}, status_code=201)
     return success_response(message="Signup successful", status_code=201)
 
 
@@ -112,8 +111,8 @@ async def login(
         max_age=60 * 60 * 24  # 1 day
     )
 
-    if ENV == "dev":
-        return success_response({"access_token": access_token}, status_code=200)
+    # if ENV == "dev":
+    #     return success_response({"access_token": access_token}, status_code=200)
     return success_response(message="Login successful", status_code=200)
 
 @router.post("/delete-account")
