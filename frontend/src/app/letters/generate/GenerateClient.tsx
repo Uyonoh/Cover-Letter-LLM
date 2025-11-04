@@ -35,14 +35,14 @@ function GenerateClient() {
         });
       }, [router]);
 
-    useEffect(() => {
-        async function getAuth() {
-            const {data: { session }, error} = await supabase.auth.getSession();
-            const user = session?.user;
-            setIsAuth(!!user);
-        }
-        getAuth();
-    }, [router]);
+    // useEffect(() => {
+    //     async function getAuth() {
+    //         const {data: { session }, error} = await supabase.auth.getSession();
+    //         const user = session?.user;
+    //         setIsAuth(!!user);
+    //     }
+    //     getAuth();
+    // }, [router]);
 
     // Check if the user has an uploaded resume after 2secs
     useEffect(() => {
@@ -143,7 +143,8 @@ function GenerateClient() {
                             </button> */}
                             <button
                                 type="submit"
-                                className="rounded-lg px-4 py-2 hidden sm:block bg-primary cursor-pointer text-white hover:bg-primary/90 transition-colors"
+                                disabled={!jobDescription}
+                                className="rounded-lg px-4 py-2 hidden sm:block bg-primary cursor-pointer text-white hover:bg-primary/90 transition-colors disabled:bg-gray-500"
                             >
                                 Generate Cover Letter
                             </button>
@@ -308,7 +309,8 @@ function GenerateClient() {
                 {/* Mobile-only submit button */}
                 <button
                     type="submit"
-                    className="rounded-lg p-2 sm:hidden bg-primary w-full my-7 cursor-pointer"
+                    disabled={!jobDescription}
+                    className="rounded-lg p-2 sm:hidden bg-primary w-full my-7 cursor-pointer disabled:bg-gray-500 "
                 >
                     Generate Cover Letter
                 </button>
