@@ -22,11 +22,11 @@ export function ToProfileUpload({ message, onContinue }: ToLoginProps) {
           {message ||
             "We could not find your resume.\nUploading a resume ensures your letter is best tailored to your talents."}
         </p>
-        <div className="flex justify-between">
+        <div className="flex justify-between gap-2">
           <button
           type="button"
           onClick={onContinue}
-          className=" text-white py-2 px-5 rounded-md border border-secondary hover:bg-secondary/90 transition-colors"
+          className=" text-white py-1 px-2 sm:py-2 sm:px-5 rounded-md border border-secondary hover:bg-secondary/90 transition-colors"
         >
           Continue
         </button>
