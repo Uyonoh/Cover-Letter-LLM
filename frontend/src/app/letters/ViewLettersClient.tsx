@@ -41,10 +41,16 @@ function ViewLettersClient() {
           .eq("user_id", session?.user.id)
           .order("created_at", {ascending: false})
 
+        if(error) {
+          setError("We could not get your letters");
+          console.error("Error fetching letters:", error);
+        }
+
         if (letters) {
           setLetters((letters as letterBrief[]) || []);
         }
       } catch (err: unknown){
+        setError("We could not get your letters");
         console.error("Error: ", err);
       } finally {
         setIsLoading(false);
