@@ -45,7 +45,7 @@ function LetterViewClient() {
 
         const { data, error } = await supabase
           .from("cover_letters")
-          .select("id, content, created_at, jobs(title, company)")
+          .select("id, content, created_at, jobs(id, title, company)")
           .eq("user_id", session?.user.id)
           .eq("id", id)
           .maybeSingle();
@@ -53,7 +53,7 @@ function LetterViewClient() {
         const letter = data as unknown as LetterView;
 
         setJobTitle(letter?.jobs?.title ?? "");
-        setJobId(letter?.job_id ?? "");
+        setJobId(letter?.jobs?.id ?? "");
         setLetter(letter?.content ?? "");
         setOldLetter(letter?.content ?? "");
 
@@ -149,14 +149,14 @@ function LetterViewClient() {
         })
         .eq("id", id);
 
-      if (error) throw error;
+      if (error) throw new Error(`Letter save failed: ${error}`);
 
       const { error: jobErr } = await supabase
         .from("jobs")
         .update({ title: jobTitle })
         .eq("id", jobId);
 
-      if (jobErr) throw jobErr;
+      if (jobErr) throw new Error(`Job save failed:  ${jobErr.message}`);
 
       setOldLetter(letter);
     } catch (err) {
