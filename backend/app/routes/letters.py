@@ -1,13 +1,15 @@
-from fastapi import APIRouter, Depends, Request, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends, Request, Query, Response
 from app.dependencies import get_current_user
 from app.services.db import get_supabase_client, get_service_client, verify_token, Client, User
 from app.services.gemini import generate_cover_letter, modify_cover_letter
 from app.models.schemas.response import ResponseModel
-from app.models.schemas.cover_letters import GenerateLetterRequest, ModifyLetterRequest, CoverLetter, ListLetterResponseData, ViewLetterResponseData, ModelResponseData, datetime, uuid, Dict, Any
+from app.models.schemas.cover_letters import GenerateLetterRequest, ModifyLetterRequest, CoverLetter, DownloadLetterRequest, ListLetterResponseData, ViewLetterResponseData, ModelResponseData, datetime, uuid, Dict, Any
 from app.utils.response import error_response, success_response, RESPONSE_ERRORS
-from app.core.logging import logger
+from app.utils.file_generators import generate_docx, generate_pdf
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/letters", tags=["letters"])
 
@@ -148,6 +150,59 @@ async def regenerate(
         return error_response(str(e), error_code=RESPONSE_ERRORS.UNKNOWN_ERROR, status_code=500)
 
 
+@router.post("/modify")
+async def modify_letter(
+    payload: ModifyLetterRequest,
+    user: Dict[str, Any]=Depends(get_current_user),
+):
+    
+    try:
+        cover_letter = await modify_cover_letter(
+            model="gemini-2.5-flash",
+            request=payload,
+        )
+        
+        return success_response({"letter": cover_letter})
+    
+    except Exception as e:
+        return error_response( str(e), error_code=RESPONSE_ERRORS.UNKNOWN_ERROR, status_code=500)
+
+
+@router.post("/download")
+def download_cover_letter(
+    payload: DownloadLetterRequest,
+):
+    """
+    Download cover letter as pdf or docx
+    """
+
+    filename = f"{payload.title.replace(' ', '_')}.{payload.format}"
+
+    if payload.format == "pdf":
+        file = generate_pdf(
+            content=payload.content,
+            title=payload.title,
+            sender_name=payload.sender_name,
+            sender_email=payload.sender_email,
+            recipient_name=payload.recipient_name,
+            recipient_company=payload.recipient_company,
+            recipient_address=payload.recipient_address,
+            include_header=payload.include_header,
+            )
+        media_type = "application/pdf"
+    else:
+        file = generate_docx(payload.content)
+        media_type = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    
+    return Response(
+        content=file.read(),
+        media_type=media_type,
+        headers={
+            "content-Disposition": f"attachment; filename={filename}"
+        }
+    )
+
+
 @router.get("/{letter_id}")
 async def view(
     request: Request,
@@ -167,20 +222,3 @@ async def view(
     )
     
     return success_response({"letter": res.data[0]})
-
-@router.post("/modify")
-async def modify_letter(
-    payload: ModifyLetterRequest,
-    user: Dict[str, Any]=Depends(get_current_user),
-):
-    
-    try:
-        cover_letter = await modify_cover_letter(
-            model="gemini-2.5-flash",
-            request=payload,
-        )
-        
-        return success_response({"letter": cover_letter})
-    
-    except Exception as e:
-        return error_response( str(e), error_code=RESPONSE_ERRORS.UNKNOWN_ERROR, status_code=500)

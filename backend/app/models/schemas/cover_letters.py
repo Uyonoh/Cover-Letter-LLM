@@ -66,3 +66,15 @@ class ModelResponseData(BaseModel):
     preferred_skills: Optional[List[str]] = []
     skills: SkillsFromJD
     cover_letter: str
+
+
+class DownloadLetterRequest(BaseModel):
+    content: str
+    title: str
+    sender_name: str
+    sender_email: str
+    recipient_name: Optional[str] = None
+    recipient_company: Optional[str] = None
+    recipient_address: Optional[str] = None
+    include_header: bool = True
+    format: str = "pdf"
