@@ -8,6 +8,7 @@ python-docx>=1.2.0
 python-dotenv>=1.1.1
 python-jose[cryptography]>=3.5.0
 python-multipart>=0.0.20
+reportlab>=4.4.4
 requests>=2.32.5
 supabase>=2.19.0
 uvicorn>=0.36.0
