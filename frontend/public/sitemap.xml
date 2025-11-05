@@ -33,9 +33,6 @@
         <priority>0.6</priority>
     </url>
     <url>
-        </url>
-
-    <url>
         <loc>http://cover-letter-llm.vercel.app/login</loc>
         <lastmod>2025-11-02</lastmod>
         <changefreq>yearly</changefreq>
