@@ -7,16 +7,21 @@ import { supabase } from "@/utils/supabaseClient";
 import { SendHorizonal } from "lucide-react";
 import Loading from "@/components/Loading";
 import DeleteButton from "@/components/DeleteButton";
-import type { LetterView } from "@/types/letters";
+import type { LetterView, letterBrief } from "@/types/letters";
+import { downloadLetter } from "@/utils/files";
 
 function LetterViewClient() {
   const [jobTitle, setJobTitle] = useState("");
   const [jobId, setJobId] = useState("");
   const [letter, setLetter] = useState("");
+  const [brief, setBrief] = useState<letterBrief>();
   const [oldLetter, setOldLetter] = useState("");
   const [prompt, setPrompt] = useState("");
   const [prompts, setPrompts] = useState<string[]>([]);
   const max_prompt_length = 150;
+
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
 
   const { id } = useParams<{ id: string }>();
   const [isLoading, setIsLoading] = useState(false);
@@ -51,11 +56,19 @@ function LetterViewClient() {
           .maybeSingle();
 
         const letter = data as unknown as LetterView;
+        setBrief(letter as letterBrief)
 
         setJobTitle(letter?.jobs?.title ?? "");
         setJobId(letter?.jobs?.id ?? "");
         setLetter(letter?.content ?? "");
         setOldLetter(letter?.content ?? "");
+
+        setEmail(session?.user.email ?? "");
+        const { data: names } = await supabase.from("profiles")
+          .select("first_name, last_name")
+          .eq("id", session?.user.id)
+          .maybeSingle()
+        setName(`${names?.first_name} ${names?.last_name}`);
 
       } catch (err: unknown) {
         console.error("Fetch error:", err);
@@ -179,6 +192,12 @@ function LetterViewClient() {
     }
   }
 
+  function handleDownload() {
+    if (brief) {
+      downloadLetter(brief, name, email)
+    }
+  }
+
   if (isLoading) {
     return (
       <Loading
@@ -242,13 +261,24 @@ function LetterViewClient() {
                   Regenerate
                 </button>
 
-                <button
-                  type="submit"
-                  disabled={oldLetter === letter}
-                  className="rounded-lg px-4 py-2 bg-primary text-white hover:bg-primary/90 cursor-pointer disabled:bg-gray-500 disabled:text-white"
-                >
-                  Save
-                </button>
+                {(oldLetter !== letter) ? 
+                  <button
+                    type="submit"
+                    disabled={oldLetter === letter}
+                    className="rounded-lg px-4 py-2 bg-primary text-white hover:bg-primary/90 cursor-pointer disabled:bg-gray-500 disabled:text-white"
+                  >
+                    Save
+                  </button>
+                  :
+                  <button
+                    type="button"
+                    disabled={oldLetter !== letter}
+                    onClick={handleDownload}
+                    className="rounded-lg px-4 py-2 bg-primary text-white hover:bg-primary/90 cursor-pointer disabled:bg-gray-500 disabled:text-white"
+                  >
+                    Download
+                  </button>
+                  }
               </div>
             </div>
           </div>
