@@ -10,7 +10,7 @@ export default function AuthPromptModal({ open, onClose }: { open: boolean; onCl
 
   const handleContinue = () => {
     onClose();
-    router.push("/login?next=/letters/generate");
+    router.push("/register?next=/letters/generate");
   };
 
   return (

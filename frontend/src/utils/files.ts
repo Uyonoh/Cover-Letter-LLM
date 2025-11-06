@@ -3,9 +3,9 @@ import type { letterBrief } from "@/types/letters";
 
 export async function downloadLetter(letter: letterBrief, name: string, email: string, format: string = "pdf") {
     // const format = "pdf";
-    const fileName = letter.jobs.title || "cover_letter";
+    const fileName = letter.jobs.title + " cover letter";
     const content = letter.content;
-    const title = letter.jobs.title || "Cover Letter 2";
+    const title = `Cover Letter for ${letter.jobs.title}`;
     const sender_name = name;
     const sender_email = email
     const recipient_name = "Hiring Manager";

@@ -24,6 +24,7 @@ function LetterViewClient() {
   const [email, setEmail] = useState("");
 
   const { id } = useParams<{ id: string }>();
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
@@ -39,7 +40,10 @@ function LetterViewClient() {
   }, []);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      setError("Invalid letter");
+      return
+    };
 
     async function loadLetter() {
       try {
@@ -207,10 +211,16 @@ function LetterViewClient() {
     );
   }
 
-  if (!id) {
+  if (error) {
     return (
-      <div>
-        <p>Letter not found!!!</p>
+      <div className="p-6 text-center text-red-400">
+        {error}
+        <button
+          onClick={() => location.reload()}
+          className="ml-4 underline hover:text-red-300"
+        >
+          Retry
+        </button>
       </div>
     );
   }
